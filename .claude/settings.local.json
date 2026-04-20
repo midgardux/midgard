@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx bmad-method *)",
+      "Bash(npm config *)",
+      "Bash(gh api *)",
+      "Bash(gh repo *)",
+      "Read(//private/tmp/bmad-method/**)",
+      "Bash(npm install *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('dependencies',{}\\), indent=2\\)\\)\")",
+      "Bash(xargs -I{} sh -c 'echo \"=== {} ===\" && cat {}')",
+      "Bash(node /tmp/bmad-install.js /tmp/bmad-method /Volumes/jasonconness2/Midgard)",
+      "Bash(cat:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:vercel.com)",
+      "WebFetch(domain:supabase.com)",
+      "WebFetch(domain:ui.shadcn.com)"
+    ]
+  }
+}

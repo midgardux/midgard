@@ -1,0 +1,115 @@
+# generated: 2026-04-18
+# last_updated: 2026-04-18
+# project: Midgard
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: "2026-04-18"
+last_updated: "2026-04-19"  # updated by dev-story
+project: Midgard
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+
+  # ─────────────────────────────────────────
+  # Epic 1: Foundation & Authentication
+  # ─────────────────────────────────────────
+  epic-1: in-progress
+  1-1-project-initialization-and-design-token-foundation: review
+  1-2-database-schema-and-supabase-configuration: backlog
+  1-3-user-signup: backlog
+  1-4-user-login-and-logout: backlog
+  1-5-password-reset: backlog
+  1-6-last-active-tracking-in-auth-middleware: backlog
+  epic-1-retrospective: optional
+
+  # ─────────────────────────────────────────
+  # Epic 2: Marketing & Acquisition
+  # ─────────────────────────────────────────
+  epic-2: backlog
+  2-1-marketing-landing-page: backlog
+  2-2-pricing-page-and-public-route-seo: backlog
+  epic-2-retrospective: optional
+
+  # ─────────────────────────────────────────
+  # Epic 3: Realm Management
+  # ─────────────────────────────────────────
+  epic-3: backlog
+  3-1-realm-list-view: backlog
+  3-2-create-a-realm: backlog
+  3-3-open-and-revisit-a-realm: backlog
+  3-4-delete-a-realm: backlog
+  epic-3-retrospective: optional
+
+  # ─────────────────────────────────────────
+  # Epic 4: Brief Submission & AI Analysis Pipeline
+  # ─────────────────────────────────────────
+  epic-4: backlog
+  4-1-attentionregion-and-button-hierarchy-components: backlog
+  4-2-brief-input-surface: backlog
+  4-3-input-quality-gate: backlog
+  4-4-allfather-loading-state-component-and-norse-microcopy: backlog
+  4-5-ai-analysis-pipeline-four-artifact-generation: backlog
+  epic-4-retrospective: optional
+
+  # ─────────────────────────────────────────
+  # Epic 5: Artifact Workspace
+  # ─────────────────────────────────────────
+  epic-5: backlog
+  5-1-artifactworkspace-layout-and-two-panel-structure: backlog
+  5-2-artifactindexpanel-and-navigation: backlog
+  5-3-artifactcontent-and-artifactsection-components: backlog
+  5-4-rolefiltertoggle: backlog
+  5-5-section-regeneration: backlog
+  5-6-workspace-accessibility-and-responsive-polish: backlog
+  epic-5-retrospective: optional
+
+  # ─────────────────────────────────────────
+  # Epic 6: Subscription & Billing
+  # ─────────────────────────────────────────
+  epic-6: backlog
+  6-1-stripe-integration-and-webhook-handler: backlog
+  6-2-upgrade-to-pro: backlog
+  6-3-subscription-management-portal: backlog
+  epic-6-retrospective: optional
+
+  # ─────────────────────────────────────────
+  # Epic 7: Operational Controls & Monitoring
+  # ─────────────────────────────────────────
+  epic-7: backlog
+  7-1-token-spend-alerting: backlog
+  7-2-free-tier-cap-runtime-configuration: backlog
+  7-3-inactivity-purge-with-advance-notification: backlog
+  epic-7-retrospective: optional

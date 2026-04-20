@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Midgard — Design Directions</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+
+    :root {
+      --bg:              #0A0A0A;
+      --surface:         #111111;
+      --surface-elevated:#1C1C1E;
+      --border:          #27272A;
+      --muted:           #3F3F46;
+      --fg:              #FAFAFA;
+      --fg-muted:        #A1A1AA;
+      --fg-subtle:       #52525B;
+      --accent:          #E8D5A3;
+      --accent-muted:    #A89060;
+      --accent-surface:  #1E1A11;
+      --success:         #22C55E;
+      --warn:            #F59E0B;
+      --err:             #EF4444;
+      --font-mono: 'SF Mono','Fira Code','Cascadia Code','Consolas',monospace;
+      --font-sans: -apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif;
+    }
+
+    body { background: #060606; color: var(--fg); font-family: var(--font-sans); }
+
+    /* ── Switcher ── */
+    .dir-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: #060606; border-bottom: 1px solid var(--border);
+      padding: 10px 20px; display: flex; align-items: center; gap: 6px;
+    }
+    .dir-nav-label {
+      font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle);
+      text-transform: uppercase; letter-spacing: .1em; margin-right: 4px;
+    }
+    .dir-tab {
+      font-family: var(--font-mono); font-size: 11px; padding: 5px 12px;
+      border: 1px solid var(--border); border-radius: 3px;
+      background: transparent; color: var(--fg-muted); cursor: pointer; transition: all .12s;
+    }
+    .dir-tab:hover { border-color: var(--muted); color: var(--fg); }
+    .dir-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-surface); }
+
+    /* ── Desc bar ── */
+    .desc-bar {
+      position: fixed; top: 45px; left: 0; right: 0; z-index: 199;
+      background: #060606; border-bottom: 1px solid #1A1A1C;
+      padding: 6px 20px; display: none; align-items: center; gap: 12px;
+    }
+    .desc-bar.active { display: flex; }
+    .desc-title { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); font-weight: 500; }
+    .desc-text  { font-size: 12px; color: var(--fg-subtle); }
+    .desc-key   { margin-left: auto; display: flex; gap: 8px; }
+    .desc-chip  {
+      font-family: var(--font-mono); font-size: 10px; padding: 2px 8px;
+      border-radius: 20px; border: 1px solid var(--border); color: var(--fg-subtle);
+    }
+    .desc-chip.hi { border-color: var(--accent-muted); color: var(--accent); }
+
+    /* ── Direction panels ── */
+    .direction-panel {
+      display: none; flex-direction: column;
+      position: fixed; top: 76px; left: 0; right: 0; bottom: 0;
+    }
+    .direction-panel.active { display: flex; }
+
+    /* ── App nav ── */
+    .app-nav {
+      height: 46px; flex-shrink: 0;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 18px; gap: 14px;
+    }
+    .app-logo {
+      font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+      color: var(--fg); letter-spacing: -.02em;
+    }
+    .app-logo span { color: var(--fg-subtle); }
+    .nav-divider { width: 1px; height: 14px; background: var(--border); }
+    .app-realm  { font-family: var(--font-mono); font-size: 12px; color: var(--fg-muted); }
+    .badge {
+      font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; border-radius: 3px;
+      background: rgba(34,197,94,.08); color: #22C55E; border: 1px solid rgba(34,197,94,.18);
+    }
+    .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .btn-ghost {
+      font-family: var(--font-mono); font-size: 11px; padding: 6px 12px;
+      background: transparent; color: var(--fg-muted);
+      border: 1px solid var(--border); border-radius: 3px; cursor: pointer;
+    }
+    .btn-ghost:hover { border-color: var(--muted); color: var(--fg); }
+    .avatar {
+      width: 22px; height: 22px; border-radius: 50%; background: var(--muted);
+      font-family: var(--font-mono); font-size: 9px;
+      display: flex; align-items: center; justify-content: center; color: var(--fg-muted);
+    }
+
+    /* ── Loading bar ── */
+    .loading-bar {
+      flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 8px 18px; display: flex; align-items: center; gap: 14px;
+    }
+    .loading-tag {
+      font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle);
+      text-transform: uppercase; letter-spacing: .08em;
+    }
+    .dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+      animation: dot-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes dot-pulse { 0%,100%{opacity:.25} 50%{opacity:1} }
+    .loading-text {
+      font-family: var(--font-mono); font-size: 12px; color: var(--fg-muted); font-style: italic;
+    }
+
+    /* ── Workspace ── */
+    .workspace { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Index panel ── */
+    .index-panel {
+      width: 258px; flex-shrink: 0;
+      background: var(--bg); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .index-head {
+      padding: 14px 14px 10px; border-bottom: 1px solid var(--border);
+    }
+    .index-head-label {
+      font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle);
+      text-transform: uppercase; letter-spacing: .1em;
+    }
+    .role-filter {
+      display: flex; gap: 5px; padding: 10px 14px; border-bottom: 1px solid var(--border);
+    }
+    .role-chip {
+      font-family: var(--font-mono); font-size: 10px; padding: 3px 9px; border-radius: 20px;
+      border: 1px solid var(--border); color: var(--fg-subtle);
+      background: transparent; cursor: pointer; transition: all .1s;
+    }
+    .role-chip:hover { border-color: var(--muted); color: var(--fg-muted); }
+    .role-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-surface); }
+    .index-item {
+      padding: 9px 14px; cursor: pointer; border-left: 2px solid transparent; transition: background .1s;
+    }
+    .index-item:hover { background: var(--surface-elevated); }
+    .index-item.active { background: var(--surface); border-left-color: var(--accent); padding-left: 12px; }
+    .index-item-name {
+      font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--fg-muted);
+    }
+    .index-item.active .index-item-name { color: var(--fg); }
+    .index-item-meta { font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); margin-top: 1px; }
+
+    /* ── Content panel ── */
+    .content-panel { flex: 1; background: var(--surface); overflow-y: auto; }
+    .content-head {
+      padding: 16px 28px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .content-tag {
+      font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle);
+      background: var(--surface-elevated); padding: 2px 8px; border-radius: 3px;
+    }
+    .content-title { font-size: 17px; font-weight: 600; color: var(--fg); }
+    .content-meta  { font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); margin-left: auto; }
+    .content-body  { padding: 22px 28px; }
+
+    /* ── Artifact sections ── */
+    .artifact-section { margin-bottom: 28px; }
+    .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .section-fig  { font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); min-width: 32px; }
+    .section-name { font-size: 13px; font-weight: 600; color: var(--fg); }
+    .btn-regen {
+      margin-left: auto; opacity: 0; transition: opacity .15s;
+      font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle);
+      padding: 3px 8px; border: 1px solid var(--border); border-radius: 3px;
+      background: transparent; cursor: pointer;
+    }
+    .artifact-section:hover .btn-regen { opacity: 1; }
+    .section-body { padding-left: 42px; }
+
+    /* ── Persona cards ── */
+    .p-card {
+      background: var(--surface-elevated); border: 1px solid var(--border);
+      border-radius: 5px; padding: 14px; margin-bottom: 10px;
+    }
+    .p-name  { font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 3px; }
+    .p-role  { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-bottom: 10px; }
+    .p-attr  { font-size: 13px; color: var(--fg-muted); margin-bottom: 6px; line-height: 1.5; }
+    .p-attr strong {
+      display: block; font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+      color: var(--fg-subtle); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 2px;
+    }
+
+    /* ══════════════════════════════════════════════════
+       DIRECTION OVERRIDES
+    ══════════════════════════════════════════════════ */
+
+    /* D1 — Pure Iron: no warm accent on structure */
+    #d1 .index-item.active      { border-left-color: var(--fg-subtle); }
+    #d1 .index-item.active .index-item-name { color: var(--fg); }
+    #d1 .role-chip.active       { border-color: var(--fg-subtle); color: var(--fg-muted); background: var(--surface-elevated); }
+    #d1 .dot                    { background: var(--fg-subtle); }
+    #d1 .p-role                 { color: var(--fg-muted); }
+    #d1 .section-fig            { color: var(--fg-subtle); }
+
+    /* D2 — Inverted Depth: index near-black, content lifted */
+    #d2 .index-panel  { background: #060606; border-right-color: #1C1C1E; }
+    #d2 .content-panel{ background: #161618; }
+    #d2 .content-head { border-bottom-color: #1E1E22; }
+    #d2 .p-card       { background: #1C1C1F; border-color: #262629; }
+    #d2 .app-nav      { background: #080808; }
+    #d2 .loading-bar  { background: #080808; border-bottom-color: #1C1C1E; }
+
+    /* D3 — Norse Glow: warm accent bleeds into logo, markers, loading */
+    #d3 .app-logo            { color: var(--accent); }
+    #d3 .app-logo span       { color: var(--accent-muted); }
+    #d3 .index-head-label    { color: var(--accent-muted); }
+    #d3 .loading-bar         { background: var(--accent-surface); border-bottom-color: rgba(232,213,163,.12); }
+    #d3 .loading-text        { color: var(--accent); }
+    #d3 .dot                 { animation: dot-pulse-warm 1.8s ease-in-out infinite; }
+    @keyframes dot-pulse-warm { 0%,100%{opacity:.3;transform:scale(.9)} 50%{opacity:1;transform:scale(1.1)} }
+    #d3 .section-fig         { color: var(--accent-muted); }
+
+    /* D4 — Dense Terminal: tighter, mono throughout, 216px index */
+    #d4 .index-panel   { width: 216px; }
+    #d4 .app-nav       { height: 38px; }
+    #d4 .loading-bar   { padding: 6px 16px; }
+    #d4 .index-item    { padding: 6px 12px; }
+    #d4 .index-item.active { padding-left: 10px; }
+    #d4 .index-item-name   { font-size: 11px; }
+    #d4 .index-item-meta   { font-size: 10px; }
+    #d4 .content-head  { padding: 10px 22px 9px; }
+    #d4 .content-title { font-size: 13px; font-family: var(--font-mono); }
+    #d4 .content-body  { padding: 14px 22px; }
+    #d4 .section-name  { font-size: 12px; font-family: var(--font-mono); }
+    #d4 .artifact-section { margin-bottom: 18px; }
+    #d4 .p-name        { font-family: var(--font-mono); font-size: 12px; }
+    #d4 .p-role        { font-size: 10px; margin-bottom: 8px; }
+    #d4 .p-attr        { font-size: 12px; }
+    #d4 .p-card        { padding: 10px; }
+    #d4 .section-body  { padding-left: 32px; }
+    #d4 .loading-text  { font-size: 11px; }
+
+    /* D5 — Structured Docs: fig. X.X, left-border cards, full-bleed sections */
+    #d5 .content-body  { padding: 0; }
+    #d5 .artifact-section { margin-bottom: 0; padding: 22px 28px; border-bottom: 1px solid var(--border); }
+    #d5 .section-fig   { color: var(--accent); font-size: 11px; min-width: 52px; }
+    #d5 .section-body  { padding-left: 62px; }
+    #d5 .p-card        { background: transparent; border: none; border-radius: 0; border-left: 2px solid var(--accent); padding: 2px 0 2px 14px; }
+    #d5 .p-role        { color: var(--accent); }
+
+    /* ── Attention state: C64 model ── */
+    .attn-region {
+      border: 1px solid var(--border);
+      padding: 24px 28px;
+      background: var(--surface);
+      margin-bottom: 24px;
+    }
+    .attn-title {
+      font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 10px;
+    }
+    .attn-body {
+      font-size: 14px; color: var(--fg-muted); line-height: 1.6; margin-bottom: 18px;
+    }
+    .attn-input {
+      width: 100%; font-family: var(--font-mono); font-size: 13px;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--fg); padding: 10px 12px; outline: none;
+      border-radius: 0; margin-bottom: 14px;
+    }
+    .attn-input:focus { border-color: var(--muted); }
+    .attn-actions { display: flex; gap: 8px; }
+    .btn-primary {
+      font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+      padding: 8px 16px; background: var(--fg); color: var(--bg);
+      border: none; border-radius: 3px; cursor: pointer;
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .btn-secondary {
+      font-family: var(--font-mono); font-size: 12px; padding: 8px 16px;
+      background: transparent; color: var(--fg-muted);
+      border: 1px solid var(--border); border-radius: 3px; cursor: pointer;
+    }
+
+    /* ── Brief input phase (D6) ── */
+    .brief-phase {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; overflow-y: auto; background: var(--bg); padding: 36px 20px;
+    }
+    .brief-wrap { width: 100%; max-width: 580px; }
+    .brief-label {
+      font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle);
+      text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px;
+    }
+    .brief-textarea {
+      width: 100%; font-family: var(--font-sans); font-size: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--fg); padding: 14px; outline: none;
+      border-radius: 0; resize: none; line-height: 1.6; margin-bottom: 10px;
+    }
+    .brief-textarea:focus { border-color: var(--muted); }
+    .brief-footer {
+      font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle);
+      margin-bottom: 0; display: flex; gap: 14px; align-items: center;
+    }
+    .brief-footer .warn { color: var(--warn); }
+  </style>
+</head>
+<body>
+
+  <!-- Switcher -->
+  <nav class="dir-nav">
+    <span class="dir-nav-label">Direction</span>
+    <button class="dir-tab active" onclick="showDir('d1',this)">D1 — Pure Iron</button>
+    <button class="dir-tab" onclick="showDir('d2',this)">D2 — Inverted Depth</button>
+    <button class="dir-tab" onclick="showDir('d3',this)">D3 — Norse Glow</button>
+    <button class="dir-tab" onclick="showDir('d4',this)">D4 — Dense Terminal</button>
+    <button class="dir-tab" onclick="showDir('d5',this)">D5 — Structured Docs</button>
+    <button class="dir-tab" onclick="showDir('d6',this)">A — Space as Signal</button>
+  </nav>
+
+  <div class="desc-bar active" id="desc-d1">
+    <span class="desc-title">D1 / Pure Iron</span>
+    <span class="desc-text">Accent stripped from structure. Mono-chrome except CTAs and focus rings. Maximum restraint.</span>
+    <div class="desc-key">
+      <span class="desc-chip">No accent on nav</span>
+      <span class="desc-chip">Border sep</span>
+      <span class="desc-chip">Titled sections</span>
+    </div>
+  </div>
+  <div class="desc-bar" id="desc-d2">
+    <span class="desc-title">D2 / Inverted Depth</span>
+    <span class="desc-text">Index panel near-black, content area slightly lifted. Depth through value inversion — edge darker, content lighter.</span>
+    <div class="desc-key">
+      <span class="desc-chip">Value inversion</span>
+      <span class="desc-chip">Accent on active</span>
+    </div>
+  </div>
+  <div class="desc-bar" id="desc-d3">
+    <span class="desc-title">D3 / Norse Glow</span>
+    <span class="desc-text">Warm accent (#E8D5A3) bleeds into logo, section markers, loading state. The "Runes" half of Runes and Iron.</span>
+    <div class="desc-key">
+      <span class="desc-chip hi">Accent on logo</span>
+      <span class="desc-chip hi">Warm loading bg</span>
+      <span class="desc-chip hi">Warm fig markers</span>
+    </div>
+  </div>
+  <div class="desc-bar" id="desc-d4">
+    <span class="desc-title">D4 / Dense Terminal</span>
+    <span class="desc-text">Mono type throughout, tighter spacing, 216px index. Linear/Raycast energy. More per viewport.</span>
+    <div class="desc-key">
+      <span class="desc-chip">All mono</span>
+      <span class="desc-chip">Tighter grid</span>
+      <span class="desc-chip">216px index</span>
+    </div>
+  </div>
+  <div class="desc-bar" id="desc-d5">
+    <span class="desc-title">D5 / Structured Docs</span>
+    <span class="desc-text">fig. X.X figure numbers, left-border persona cards, full-bleed section rows. stripe.dev documentation aesthetic.</span>
+    <div class="desc-key">
+      <span class="desc-chip">fig. numbering</span>
+      <span class="desc-chip">Left-border cards</span>
+      <span class="desc-chip">Full-bleed rows</span>
+    </div>
+  </div>
+  <div class="desc-bar" id="desc-d6">
+    <span class="desc-title">A / Space as Signal</span>
+    <span class="desc-text">C64 model: attention states get breathing room within the same visual system. Border + space = signal. No register change.</span>
+    <div class="desc-key">
+      <span class="desc-chip hi">Same surface</span>
+      <span class="desc-chip hi">Border + space</span>
+      <span class="desc-chip hi">No overlay</span>
+    </div>
+  </div>
+
+  <!-- ════════════════ D1: PURE IRON ════════════════ -->
+  <div class="direction-panel active" id="d1">
+    <div class="app-nav">
+      <span class="app-logo">midgard<span>.</span></span>
+      <div class="nav-divider"></div>
+      <span class="app-realm">e-commerce rebrand</span>
+      <span class="badge">complete</span>
+      <div class="nav-right">
+        <button class="btn-ghost">New Realm</button>
+        <div class="avatar">M</div>
+      </div>
+    </div>
+    <div class="loading-bar">
+      <span class="loading-tag">Loading state preview</span>
+      <div class="dot"></div>
+      <span class="loading-text">The Allfather sees.</span>
+    </div>
+    <div class="workspace">
+      <div class="index-panel">
+        <div class="index-head"><div class="index-head-label">Artifacts</div></div>
+        <div class="role-filter">
+          <button class="role-chip active">All roles</button>
+          <button class="role-chip">Designer</button>
+          <button class="role-chip">PM</button>
+        </div>
+        <div class="index-item"><div class="index-item-name">/synthesis</div><div class="index-item-meta">Overview · 4 sections</div></div>
+        <div class="index-item active"><div class="index-item-name">/personas</div><div class="index-item-meta">3 personas</div></div>
+        <div class="index-item"><div class="index-item-name">/flows</div><div class="index-item-meta">5 flows · Designer</div></div>
+        <div class="index-item"><div class="index-item-name">/ia</div><div class="index-item-meta">Information architecture</div></div>
+      </div>
+      <div class="content-panel">
+        <div class="content-head">
+          <span class="content-tag">/personas</span>
+          <span class="content-title">User Personas</span>
+          <span class="content-meta">Generated 2 min ago</span>
+        </div>
+        <div class="content-body">
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">1.0</span>
+              <span class="section-name">Primary Persona</span>
+              <button class="btn-regen">↺ regenerate</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">Maya Chen</div>
+                <div class="p-role">Senior UX Designer · Contractor</div>
+                <div class="p-attr"><strong>Goals</strong>Move from ambiguous brief to structured mental model before opening Figma. Deliver clear design direction without days of prep work.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Vague client briefs with no user context. Hours spent inferring requirements that should be explicit.</div>
+                <div class="p-attr"><strong>Behavior</strong>Desktop-first. Design-tool native. Returns at the start of every new client engagement.</div>
+              </div>
+            </div>
+          </div>
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">2.0</span>
+              <span class="section-name">Secondary Persona</span>
+              <button class="btn-regen">↺ regenerate</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">James R.</div>
+                <div class="p-role">Product Manager · In-house</div>
+                <div class="p-attr"><strong>Goals</strong>Align engineering and design teams on user needs before sprint planning.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Design decisions made without user context. Repeated re-work due to unclear requirements.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ D2: INVERTED DEPTH ════════════════ -->
+  <div class="direction-panel" id="d2">
+    <div class="app-nav">
+      <span class="app-logo">midgard<span>.</span></span>
+      <div class="nav-divider"></div>
+      <span class="app-realm">e-commerce rebrand</span>
+      <span class="badge">complete</span>
+      <div class="nav-right">
+        <button class="btn-ghost">New Realm</button>
+        <div class="avatar">M</div>
+      </div>
+    </div>
+    <div class="loading-bar">
+      <span class="loading-tag">Loading state preview</span>
+      <div class="dot"></div>
+      <span class="loading-text">Your Realm takes shape.</span>
+    </div>
+    <div class="workspace">
+      <div class="index-panel">
+        <div class="index-head"><div class="index-head-label">Artifacts</div></div>
+        <div class="role-filter">
+          <button class="role-chip active">All roles</button>
+          <button class="role-chip">Designer</button>
+          <button class="role-chip">PM</button>
+        </div>
+        <div class="index-item"><div class="index-item-name">/synthesis</div><div class="index-item-meta">Overview · 4 sections</div></div>
+        <div class="index-item active"><div class="index-item-name">/personas</div><div class="index-item-meta">3 personas</div></div>
+        <div class="index-item"><div class="index-item-name">/flows</div><div class="index-item-meta">5 flows · Designer</div></div>
+        <div class="index-item"><div class="index-item-name">/ia</div><div class="index-item-meta">Information architecture</div></div>
+      </div>
+      <div class="content-panel">
+        <div class="content-head">
+          <span class="content-tag">/personas</span>
+          <span class="content-title">User Personas</span>
+          <span class="content-meta">Generated 2 min ago</span>
+        </div>
+        <div class="content-body">
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">1.0</span>
+              <span class="section-name">Primary Persona</span>
+              <button class="btn-regen">↺ regenerate</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">Maya Chen</div>
+                <div class="p-role">Senior UX Designer · Contractor</div>
+                <div class="p-attr"><strong>Goals</strong>Move from ambiguous brief to structured mental model before opening Figma.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Vague client briefs with no user context. Hours spent inferring requirements.</div>
+                <div class="p-attr"><strong>Behavior</strong>Desktop-first. Design-tool native. Returns at the start of every new engagement.</div>
+              </div>
+            </div>
+          </div>
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">2.0</span>
+              <span class="section-name">Secondary Persona</span>
+              <button class="btn-regen">↺ regenerate</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">James R.</div>
+                <div class="p-role">Product Manager · In-house</div>
+                <div class="p-attr"><strong>Goals</strong>Align engineering and design teams on user needs before sprint planning.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Design decisions made without user context. Repeated re-work.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ D3: NORSE GLOW ════════════════ -->
+  <div class="direction-panel" id="d3">
+    <div class="app-nav">
+      <span class="app-logo">midgard<span>.</span></span>
+      <div class="nav-divider"></div>
+      <span class="app-realm">e-commerce rebrand</span>
+      <span class="badge">complete</span>
+      <div class="nav-right">
+        <button class="btn-ghost">New Realm</button>
+        <div class="avatar">M</div>
+      </div>
+    </div>
+    <div class="loading-bar">
+      <span class="loading-tag">Loading state preview</span>
+      <div class="dot"></div>
+      <span class="loading-text">The flows are written.</span>
+    </div>
+    <div class="workspace">
+      <div class="index-panel">
+        <div class="index-head"><div class="index-head-label">Artifacts</div></div>
+        <div class="role-filter">
+          <button class="role-chip active">All roles</button>
+          <button class="role-chip">Designer</button>
+          <button class="role-chip">PM</button>
+        </div>
+        <div class="index-item"><div class="index-item-name">/synthesis</div><div class="index-item-meta">Overview · 4 sections</div></div>
+        <div class="index-item active"><div class="index-item-name">/personas</div><div class="index-item-meta">3 personas</div></div>
+        <div class="index-item"><div class="index-item-name">/flows</div><div class="index-item-meta">5 flows · Designer</div></div>
+        <div class="index-item"><div class="index-item-name">/ia</div><div class="index-item-meta">Information architecture</div></div>
+      </div>
+      <div class="content-panel">
+        <div class="content-head">
+          <span class="content-tag">/personas</span>
+          <span class="content-title">User Personas</span>
+          <span class="content-meta">Generated 2 min ago</span>
+        </div>
+        <div class="content-body">
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">1.0</span>
+              <span class="section-name">Primary Persona</span>
+              <button class="btn-regen">↺ regenerate</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">Maya Chen</div>
+                <div class="p-role">Senior UX Designer · Contractor</div>
+                <div class="p-attr"><strong>Goals</strong>Move from ambiguous brief to structured mental model before opening Figma.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Vague client briefs with no user context. Hours spent inferring requirements.</div>
+                <div class="p-attr"><strong>Behavior</strong>Desktop-first. Design-tool native. Returns at the start of every new engagement.</div>
+              </div>
+            </div>
+          </div>
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">2.0</span>
+              <span class="section-name">Secondary Persona</span>
+              <button class="btn-regen">↺ regenerate</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">James R.</div>
+                <div class="p-role">Product Manager · In-house</div>
+                <div class="p-attr"><strong>Goals</strong>Align engineering and design teams on user needs before sprint planning.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Design decisions made without user context. Repeated re-work.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ D4: DENSE TERMINAL ════════════════ -->
+  <div class="direction-panel" id="d4">
+    <div class="app-nav">
+      <span class="app-logo">midgard<span>.</span></span>
+      <div class="nav-divider"></div>
+      <span class="app-realm">e-commerce rebrand</span>
+      <span class="badge">complete</span>
+      <div class="nav-right">
+        <button class="btn-ghost">New Realm</button>
+        <div class="avatar">M</div>
+      </div>
+    </div>
+    <div class="loading-bar">
+      <span class="loading-tag">Loading state preview</span>
+      <div class="dot"></div>
+      <span class="loading-text">The Allfather sees.</span>
+    </div>
+    <div class="workspace">
+      <div class="index-panel">
+        <div class="index-head"><div class="index-head-label">Artifacts</div></div>
+        <div class="role-filter">
+          <button class="role-chip active">All</button>
+          <button class="role-chip">Designer</button>
+          <button class="role-chip">PM</button>
+        </div>
+        <div class="index-item"><div class="index-item-name">/synthesis</div><div class="index-item-meta">4 sections</div></div>
+        <div class="index-item active"><div class="index-item-name">/personas</div><div class="index-item-meta">3 personas</div></div>
+        <div class="index-item"><div class="index-item-name">/flows</div><div class="index-item-meta">5 flows</div></div>
+        <div class="index-item"><div class="index-item-name">/ia</div><div class="index-item-meta">structure</div></div>
+      </div>
+      <div class="content-panel">
+        <div class="content-head">
+          <span class="content-tag">/personas</span>
+          <span class="content-title">User Personas</span>
+          <span class="content-meta">2m ago</span>
+        </div>
+        <div class="content-body">
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">1.0</span>
+              <span class="section-name">Primary Persona</span>
+              <button class="btn-regen">↺ regen</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">Maya Chen</div>
+                <div class="p-role">Senior UX Designer · Contractor</div>
+                <div class="p-attr"><strong>Goals</strong>Brief → mental model before Figma. Clear direction without days of prep.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Vague briefs. Inferring requirements. Starting Figma too early.</div>
+                <div class="p-attr"><strong>Behavior</strong>Desktop-first. Returns per engagement. Shares as living doc.</div>
+              </div>
+            </div>
+          </div>
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">2.0</span>
+              <span class="section-name">Secondary Persona</span>
+              <button class="btn-regen">↺ regen</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">James R.</div>
+                <div class="p-role">Product Manager · In-house</div>
+                <div class="p-attr"><strong>Goals</strong>Align eng + design on user needs pre-sprint.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Decisions without user context. Repeated re-work.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ D5: STRUCTURED DOCS ════════════════ -->
+  <div class="direction-panel" id="d5">
+    <div class="app-nav">
+      <span class="app-logo">midgard<span>.</span></span>
+      <div class="nav-divider"></div>
+      <span class="app-realm">e-commerce rebrand</span>
+      <span class="badge">complete</span>
+      <div class="nav-right">
+        <button class="btn-ghost">New Realm</button>
+        <div class="avatar">M</div>
+      </div>
+    </div>
+    <div class="loading-bar">
+      <span class="loading-tag">Loading state preview</span>
+      <div class="dot"></div>
+      <span class="loading-text">The Allfather sees.</span>
+    </div>
+    <div class="workspace">
+      <div class="index-panel">
+        <div class="index-head"><div class="index-head-label">Artifacts</div></div>
+        <div class="role-filter">
+          <button class="role-chip active">All roles</button>
+          <button class="role-chip">Designer</button>
+          <button class="role-chip">PM</button>
+        </div>
+        <div class="index-item"><div class="index-item-name">/synthesis</div><div class="index-item-meta">Overview · 4 sections</div></div>
+        <div class="index-item active"><div class="index-item-name">/personas</div><div class="index-item-meta">3 personas</div></div>
+        <div class="index-item"><div class="index-item-name">/flows</div><div class="index-item-meta">5 flows · Designer</div></div>
+        <div class="index-item"><div class="index-item-name">/ia</div><div class="index-item-meta">Information architecture</div></div>
+      </div>
+      <div class="content-panel">
+        <div class="content-head">
+          <span class="content-tag">/personas</span>
+          <span class="content-title">User Personas</span>
+          <span class="content-meta">Generated 2 min ago</span>
+        </div>
+        <div class="content-body">
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">fig. 1.0</span>
+              <span class="section-name">Primary Persona</span>
+              <button class="btn-regen">↺ regenerate</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">Maya Chen</div>
+                <div class="p-role">Senior UX Designer · Contractor</div>
+                <div class="p-attr"><strong>Goals</strong>Move from ambiguous brief to structured mental model before opening Figma. Deliver clear design direction without days of prep work.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Vague client briefs with no user context. Hours spent inferring requirements.</div>
+                <div class="p-attr"><strong>Behavior</strong>Desktop-first. Design-tool native. Returns at the start of every new engagement.</div>
+              </div>
+            </div>
+          </div>
+          <div class="artifact-section">
+            <div class="section-head">
+              <span class="section-fig">fig. 2.0</span>
+              <span class="section-name">Secondary Persona</span>
+              <button class="btn-regen">↺ regenerate</button>
+            </div>
+            <div class="section-body">
+              <div class="p-card">
+                <div class="p-name">James R.</div>
+                <div class="p-role">Product Manager · In-house</div>
+                <div class="p-attr"><strong>Goals</strong>Align engineering and design teams on user needs before sprint planning.</div>
+                <div class="p-attr"><strong>Frustrations</strong>Design decisions made without user context. Repeated re-work.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ A: SPACE AS SIGNAL ════════════════ -->
+  <!-- Uses D3 (Norse Glow) as base — shows three attention states
+       in the same surface using the C64 model: border + space, no register change -->
+  <div class="direction-panel" id="d6">
+    <div class="app-nav" style="background:var(--bg);">
+      <span class="app-logo" style="color:var(--accent)">midgard<span style="color:var(--accent-muted)">.</span></span>
+      <div class="nav-divider"></div>
+      <span class="app-realm">e-commerce rebrand — new</span>
+      <div class="nav-right"><div class="avatar">M</div></div>
+    </div>
+
+    <!-- Quality gate: brief input phase -->
+    <div class="brief-phase">
+      <div class="brief-wrap">
+        <div class="brief-label">Brief · New Realm</div>
+        <textarea class="brief-textarea" rows="4" readonly>I need to redesign the checkout flow for our e-commerce platform. The current flow has too many steps and users are dropping off before completing their purchase. We want something simpler and faster.</textarea>
+        <div class="brief-footer">
+          <span>47 words</span>
+          <span class="warn">⚠ quality gate — brief is missing a target user</span>
+        </div>
+
+        <!-- C64 model: quality gate — same surface bg, border + space = signal -->
+        <div style="margin-top: 18px;">
+          <div class="attn-region">
+            <div class="attn-title">The Allfather requires more.</div>
+            <div class="attn-body">Your brief describes a problem but not a person. Who is completing this checkout? A returning customer with saved payment details, a first-time guest, a mobile user in a hurry? The analysis cannot proceed without knowing who it is for.</div>
+            <input class="attn-input" type="text" placeholder="e.g. mobile shoppers, first-time buyers, returning customers with accounts…" />
+            <div class="attn-actions">
+              <button class="btn-primary">Continue</button>
+              <button class="btn-secondary">Skip</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error state example below, for comparison -->
+        <div style="margin-top: 6px;">
+          <div class="attn-region" style="border-color: var(--err);">
+            <div class="attn-title" style="display:flex; align-items:center; gap:8px;">
+              <span style="font-family:var(--font-mono); font-size:11px; color:var(--err);">✕ Error</span>
+              <span>Analysis could not complete.</span>
+            </div>
+            <div class="attn-body">The connection to the analysis service timed out. Your brief has been preserved and no Realm state was written. You can retry now or come back later.</div>
+            <div class="attn-actions">
+              <button class="btn-primary">Retry</button>
+              <button class="btn-secondary">Save and exit</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); padding: 10px 0;">
+          ↑ Two attention states. Same surface (#111111). Same type. Same tokens. Border + space = signal. Nothing else changes.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showDir(id, btn) {
+      document.querySelectorAll('.direction-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.dir-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.desc-bar').forEach(d => d.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById('desc-' + id).classList.add('active');
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>
