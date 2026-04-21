@@ -18,7 +18,8 @@
       "WebFetch(domain:ui.shadcn.com)",
       "Bash(pnpm tsc *)",
       "Bash(pnpm lint *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
