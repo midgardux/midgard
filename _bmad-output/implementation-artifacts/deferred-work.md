@@ -1,3 +1,10 @@
+## Deferred from: code review of 1-4-user-login-and-logout (2026-04-20)
+
+- Missing env vars runtime throw — `createBrowserClient` uses non-null assertions on Supabase env vars; if either is undefined at runtime the SDK throws with no user feedback. Pre-existing, not introduced by Story 1.4.
+- `/auth/confirm` open redirect — `next` query param passed verbatim to `redirect()`; originally deferred in Story 1.2. No change in Story 1.4 but still unresolved.
+- `SignUpForm` "Already have an account?" still links to `/auth/login` instead of the new canonical `/login` route — not in Story 1.4 scope; should be fixed in a cleanup pass.
+- `createServerClient` cookie removal handler — whether the Story 1.2 implementation correctly removes the session cookie on `signOut`; surfaced by the Acceptance Auditor but pre-existing.
+
 ## Deferred from: code review of 1-3-user-signup (2026-04-20)
 
 - Password-mismatch check runs before length check — minor UX ordering; if both conditions apply, mismatch error shows first. Not a bug, just a preference question for a future pass.
