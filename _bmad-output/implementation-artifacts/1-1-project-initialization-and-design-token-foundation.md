@@ -1,6 +1,6 @@
 # Story 1.1: Project Initialization & Design Token Foundation
 
-Status: review
+Status: done
 
 ## Story
 
@@ -387,6 +387,15 @@ claude-sonnet-4-6
 - `components/ui/tooltip.tsx` — created: by shadcn CLI
 - `components/ui/separator.tsx` — created: by shadcn CLI
 - `components/ui/textarea.tsx` — created: by shadcn CLI
+
+### Review Findings
+
+- [x] [Review][Decision] Dark mode theming strategy — ThemeProvider uses `defaultTheme="system"` but all 15 Midgard tokens are dark-palette hex values with no light-mode counterpart. On a light-mode system the UI will be illegible (dark text on white shadcn background, dark mg-* tokens still active). Options: (A) force dark-only (`defaultTheme="dark"` + `forcedTheme="dark"`), (B) define light-mode mg-* overrides in `.dark` scope and keep system theme, (C) leave as-is and accept dark-only. [app/layout.tsx, app/globals.css]
+- [x] [Review][Decision] Font-sans not applied to body — `GeistSans.variable` / `GeistMono.variable` inject CSS vars on `<html>`, and Tailwind `fontFamily.sans` references them, but `<body>` has only `antialiased` with no `font-sans` class. Without `font-sans` on body, Geist is never the active font-family for body text. Options: (A) add `font-sans` to `<body className>`, (B) add `font-family: var(--font-geist-sans)` in globals.css body base style, (C) accept that components opt in individually. [app/layout.tsx:23]
+- [x] [Review][Patch] `proxy.ts` must be renamed `middleware.ts` and export renamed to `middleware` — Next.js only picks up middleware from a file named `middleware.ts` at the project root exporting a function named `middleware`. Current file (`proxy.ts`, exporting `proxy()`) is silently ignored by the runtime; all session refresh and auth-gating logic is dead. [proxy.ts]
+- [x] [Review][Patch] `.env.example` documents wrong Supabase key name — file has `NEXT_PUBLIC_SUPABASE_ANON_KEY` but `lib/supabase/client.ts`, `lib/supabase/server.ts`, and `lib/supabase/proxy.ts` all read `process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Any developer who follows the example will set the wrong var and get `undefined` on every Supabase client instantiation. [.env.example, lib/supabase/client.ts:5, lib/supabase/server.ts:11]
+- [x] [Review][Defer] No security headers (CSP, X-Frame-Options, etc.) in middleware — deferred, pre-existing / out of story scope
+- [x] [Review][Defer] VERCEL_URL used as metadataBase injects preview-deploy URLs into OG/canonical tags — deferred, pre-existing / minor SEO concern for later
 
 ## Change Log
 

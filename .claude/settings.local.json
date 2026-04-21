@@ -15,7 +15,10 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:vercel.com)",
       "WebFetch(domain:supabase.com)",
-      "WebFetch(domain:ui.shadcn.com)"
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(pnpm tsc *)",
+      "Bash(pnpm lint *)",
+      "Bash(git add *)"
     ]
   }
 }

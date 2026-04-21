@@ -30,22 +30,22 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    /* Midgard design tokens — use var(--mg-*) in app components */
-    --mg-background:          #0A0A0A;
-    --mg-surface:             #111111;
-    --mg-surface-elevated:    #1C1C1E;
-    --mg-border:              #27272A;
-    --mg-muted:               #3F3F46;
-    --mg-foreground:          #FAFAFA;
-    --mg-foreground-muted:    #A1A1AA;
-    --mg-foreground-subtle:   #52525B;
-    --mg-accent:              #E8D5A3;
-    --mg-accent-muted:        #A89060;
-    --mg-accent-surface:      #1E1A11;
-    --mg-success:             #22C55E;
-    --mg-warning:             #F59E0B;
-    --mg-destructive:         #EF4444;
-    --mg-info:                #3B82F6;
+    /* Midgard design tokens — light mode */
+    --mg-background:          #FAFAFA;
+    --mg-surface:             #FFFFFF;
+    --mg-surface-elevated:    #F4F4F5;
+    --mg-border:              #E4E4E7;
+    --mg-muted:               #A1A1AA;
+    --mg-foreground:          #09090B;
+    --mg-foreground-muted:    #52525B;
+    --mg-foreground-subtle:   #71717A;
+    --mg-accent:              #C9A84C;
+    --mg-accent-muted:        #8B6F3A;
+    --mg-accent-surface:      #FDF3DC;
+    --mg-success:             #16A34A;
+    --mg-warning:             #D97706;
+    --mg-destructive:         #DC2626;
+    --mg-info:                #2563EB;
 
     /* Layout tokens */
     --index-panel-width:      258px;
@@ -76,6 +76,23 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* Midgard design tokens — dark mode */
+    --mg-background:          #0A0A0A;
+    --mg-surface:             #111111;
+    --mg-surface-elevated:    #1C1C1E;
+    --mg-border:              #27272A;
+    --mg-muted:               #3F3F46;
+    --mg-foreground:          #FAFAFA;
+    --mg-foreground-muted:    #A1A1AA;
+    --mg-foreground-subtle:   #52525B;
+    --mg-accent:              #E8D5A3;
+    --mg-accent-muted:        #A89060;
+    --mg-accent-surface:      #1E1A11;
+    --mg-success:             #22C55E;
+    --mg-warning:             #F59E0B;
+    --mg-destructive:         #EF4444;
+    --mg-info:                #3B82F6;
   }
 }
 
