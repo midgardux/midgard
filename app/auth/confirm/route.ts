@@ -17,10 +17,11 @@ export async function GET(request: NextRequest) {
       token_hash,
     });
     if (!error) {
-      // redirect user to specified redirect URL or root of app
       redirect(next);
+    } else if (type === "recovery") {
+      // Expired or invalid recovery links land on the reset page with an error param
+      redirect("/auth/reset-password?error=expired");
     } else {
-      // redirect the user to an error page with some instructions
       redirect(`/auth/error?error=${error?.message}`);
     }
   }

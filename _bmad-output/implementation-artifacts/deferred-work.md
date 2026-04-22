@@ -1,3 +1,12 @@
+## Deferred from: code review of 1-5-password-reset (2026-04-21)
+
+- `error.message` appended raw to `/auth/error` redirect URL for non-recovery OTP failures — Supabase error strings can contain internal detail; not URL-encoded. Pre-existing in `app/auth/confirm/route.ts`.
+- Open redirect via unvalidated `next` query param in confirm route — also logged from Stories 1.2 and 1.4; still unresolved. Pre-existing.
+- `initialError` prop only evaluated at `useState` initializer in `UpdatePasswordForm` — prop changes after mount (e.g. back-button SPA navigation) won't update the displayed error. Matches spec's "detect on mount" requirement; React limitation.
+- `/login?message=password-reset` banner injectable via crafted URL — cosmetically misleading but no security impact; pattern is by design per spec.
+- Route group placement inconsistency — forgot-password under `(marketing)`, reset-password under flat `app/auth/`; these are the two pages of the same user flow but may render under different layouts. Intentional per spec; revisit when `(app)/` route group is created in Epic 3.
+- No fallback redirect when `token_hash`/`type` absent from `app/auth/confirm/route.ts` — request falls through with no response. Pre-existing; not in Story 1.5 scope.
+
 ## Deferred from: code review of 1-4-user-login-and-logout (2026-04-20)
 
 - Missing env vars runtime throw — `createBrowserClient` uses non-null assertions on Supabase env vars; if either is undefined at runtime the SDK throws with no user feedback. Pre-existing, not introduced by Story 1.4.

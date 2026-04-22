@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { createBrowserClient } from "@/lib/supabase/browser";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,59 +20,63 @@ export function ForgotPasswordForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
+    if (isLoading) return;
+
     setIsLoading(true);
-    setError(null);
+    const supabase = createBrowserClient();
 
     try {
-      // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+      await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth/confirm?next=/auth/reset-password`,
       });
-      if (error) throw error;
-      setSuccess(true);
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
+    } catch {
+      // Intentionally suppressed — always show success (no user enumeration)
     }
+
+    setIsLoading(false);
+    setSuccess(true);
   };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       {success ? (
-        <Card>
+        <Card className="bg-mg-surface border border-mg-border">
           <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>Password reset instructions sent</CardDescription>
+            <CardTitle className="text-2xl text-mg-foreground font-sans">
+              Check your email
+            </CardTitle>
+            <CardDescription className="text-mg-foreground-muted">
+              Password reset instructions sent
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              If you registered using your email and password, you will receive
-              a password reset email.
+            <p className="text-sm text-mg-foreground-muted">
+              Check your email for a reset link.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="bg-mg-surface border border-mg-border">
           <CardHeader>
-            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-            <CardDescription>
-              Type in your email and we&apos;ll send you a link to reset your
-              password
+            <CardTitle className="text-2xl text-mg-foreground font-sans">
+              Forgot password
+            </CardTitle>
+            <CardDescription className="text-mg-foreground-muted">
+              Enter your email and we&apos;ll send you a reset link.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleForgotPassword}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-mg-foreground-muted">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -80,20 +84,26 @@ export function ForgotPasswordForm({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="border-mg-border focus:border-mg-accent"
                   />
                 </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send reset email"}
+                <Button
+                  type="submit"
+                  className="w-full bg-mg-accent text-[#0A0A0A] font-mono text-xs uppercase tracking-wide"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Sending..." : "Send reset link"}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
+                <span className="text-mg-foreground-muted">
+                  Remember your password?{" "}
+                </span>
                 <Link
-                  href="/auth/login"
-                  className="underline underline-offset-4"
+                  href="/login"
+                  className="underline underline-offset-4 text-mg-foreground-muted"
                 >
-                  Login
+                  Log in
                 </Link>
               </div>
             </form>
