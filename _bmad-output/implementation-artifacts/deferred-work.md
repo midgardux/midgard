@@ -32,3 +32,9 @@
 
 - No security headers (CSP, X-Frame-Options, Referrer-Policy, etc.) at middleware layer — meaningful gap for a platform handling Stripe webhooks and API keys, but out of scope for Story 1.1. Revisit when middleware is extended in Story 1.6.
 - `VERCEL_URL` used as `metadataBase` in `app/layout.tsx` — preview deployments get OG/canonical URLs pointing to the preview domain, which can pollute SEO metadata if staging environments are indexed. Low priority; revisit before production launch.
+
+## Deferred from: code review of 1-6-last-active-tracking-in-auth-middleware (2026-04-22)
+
+- Write amplification: `last_active_at` upsert fires on every authenticated middleware invocation, including prefetch requests and `_next/data` fetches. No debounce or minimum-interval check. Spec explicitly accepts this at V1 scale (0–500 concurrent users); revisit before scaling.
+- `PasswordResetMessage` `message` param is user-controlled — any URL with `?message=password-reset` shows the confirmation banner without a real reset having occurred. Pre-existing behavior; consider a server-side flash mechanism or signed token before launch.
+- `.claude/settings.local.json` overly broad permissions: `Read(//dev/**)` (device files), `Read(//private/tmp/**)` (system temp, may contain credentials), and bare `Bash(git commit *)` (allows --amend, --no-verify). Tighten before sharing this config with other developers.

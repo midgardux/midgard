@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-18"
-last_updated: "2026-04-21"  # updated by code-review
+last_updated: "2026-04-22"  # updated by code-review
 project: Midgard
 project_key: NOKEY
 tracking_system: file-system
@@ -52,7 +52,7 @@ development_status:
   1-3-user-signup: done
   1-4-user-login-and-logout: done
   1-5-password-reset: done
-  1-6-last-active-tracking-in-auth-middleware: backlog
+  1-6-last-active-tracking-in-auth-middleware: done
   epic-1-retrospective: optional
 
   # ─────────────────────────────────────────

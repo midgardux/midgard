@@ -47,18 +47,29 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/signup") &&
-    !request.nextUrl.pathname.startsWith("/forgot-password") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
+  const pathname = request.nextUrl.pathname;
+  const isPublicPath =
+    pathname === "/" ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/auth");
+
+  if (!user && !isPublicPath) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
+  }
+
+  if (user?.sub && !isPublicPath) {
+    const now = new Date().toISOString();
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .upsert({ id: user.sub, last_active_at: now, updated_at: now }, { onConflict: "id" });
+    if (updateError) {
+      console.error("[middleware] last_active_at update failed:", updateError.message);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
