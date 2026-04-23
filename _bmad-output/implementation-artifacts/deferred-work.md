@@ -1,3 +1,11 @@
+## Deferred from: code review of 2-1-marketing-landing-page (2026-04-22)
+
+- Landing page Pro CTA passes `?plan=pro` to `/signup`; Story 6.2 must read this param after email confirmation and route the verified user into Stripe Checkout before landing them in `/projects`.
+- ThemeSwitcher in `app/protected/layout.tsx` still offers light/system options that `forcedTheme="dark"` silently overrides — pre-existing Supabase starter component; remove or replace ThemeSwitcher when building the authenticated app shell in Epic 3.
+- Pricing hardcoded in JSX ($19/month in `app/(marketing)/page.tsx`) — intentional MVP; extract to a pricing constants file or config when Epic 6 (billing) introduces Stripe price IDs.
+- `disableTransitionOnChange` retained alongside `forcedTheme="dark"` in `app/layout.tsx` — dead config, harmless; remove in a future cleanup pass.
+- `app/robots.ts` has no `sitemap` or `host` field; no `app/sitemap.ts` exists — add both when Story 2.2 (Pricing Page & Public Route SEO) is implemented.
+
 ## Deferred from: code review of 1-5-password-reset (2026-04-21)
 
 - `error.message` appended raw to `/auth/error` redirect URL for non-recovery OTP failures — Supabase error strings can contain internal detail; not URL-encoded. Pre-existing in `app/auth/confirm/route.ts`.

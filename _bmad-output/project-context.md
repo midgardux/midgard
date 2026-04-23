@@ -5,7 +5,7 @@ date: '2026-04-19'
 sections_completed:
   ['technology_stack', 'language_rules', 'framework_rules', 'testing_rules', 'quality_rules', 'workflow_rules', 'anti_patterns']
 status: 'complete'
-rule_count: 47
+rule_count: 61
 optimized_for_llm: true
 ---
 
@@ -78,10 +78,11 @@ _Critical rules and patterns for implementing code in this project. Focused on u
 
 **Supabase:**
 - Always destructure `{ data, error }` — always check `error` before using `data`
-- Server Components + Server Actions → `@/lib/supabase/server`
-- Client Components → `@/lib/supabase/client`
+- Server Components + Server Actions → `createServerClient()` from `@/lib/supabase/server`
+- Client Components → `createBrowserClient()` from `@/lib/supabase/browser` — NOT `@/lib/supabase/client` (that file is shadcn-internal only; importing it in app code is incorrect)
 - RLS enforces user data scoping at DB level — no app-layer auth duplication needed
 - No ORM — raw `@supabase/supabase-js` queries only
+- `updated_at` has no auto-update trigger — every UPDATE statement must explicitly include `updated_at: new Date().toISOString()`
 
 ### Testing Rules
 
@@ -136,11 +137,26 @@ _Critical rules and patterns for implementing code in this project. Focused on u
 - Stripe webhooks: always verify with `stripe.webhooks.constructEvent()` — never trust raw payload
 - Server Actions handle auth via server-side Supabase client + RLS — do not use browser client in actions
 - Route protection is handled by middleware for `/app/*` — do not duplicate in every page
+- `/auth/confirm` `next` param must be validated against an allowlist before passing to `redirect()` — never redirect to an arbitrary external URL
+- Midgard is dark-only — ThemeProvider must use `defaultTheme="dark"` and `forcedTheme="dark"`; there are no light-mode token overrides
 
 **Error handling shape:**
 - Claude failure → `{ success: false, error: 'Generation failed. Your brief was saved. Try again.' }` + no partial DB state
 - Stripe webhook failure → return HTTP 500 (Stripe retries) + log event ID
 - Client errors → `AttentionRegion` Error variant — never `alert()`
+- Never surface raw Supabase error messages to users — always map to generic human-readable copy
+
+**Form & auth patterns (learned from Epic 1 code review):**
+- Server Actions that cause navigation must use `<form action={serverAction}>` — never call as a fire-and-forget from a click handler
+- Always add double-submit guard `if (isLoading) return` as the FIRST line of any form submit handler, before any state mutations
+- `router.refresh()` is required before `router.push()` when the destination route reads session state server-side (e.g. login → `/projects`)
+- Use `router.replace()` not `router.push()` after one-time/destructive auth operations (password reset success, etc.) — prevents back-navigation to an already-used form
+- Always `trim()` text input before validation AND send the trimmed value to the API — never validate trimmed but send raw
+- Whitespace-only passwords must be rejected: `password.trim().length < minimumLength`
+
+**Middleware public path allowlist:**
+- When adding a new public route (e.g. `/pricing` in Epic 2), update BOTH the redirect guard block AND the `isPublicPath` boolean in `lib/supabase/proxy.ts`
+- Current public paths: `/` (exact), `/login*`, `/signup*`, `/forgot-password*`, `/auth*`
 
 ---
 
@@ -150,4 +166,4 @@ _Critical rules and patterns for implementing code in this project. Focused on u
 
 **For Humans:** Update when stack changes or new patterns emerge. Review after each epic to remove rules that have become obvious.
 
-_Last Updated: 2026-04-19_
+_Last Updated: 2026-04-22 (Epic 1 retrospective — auth patterns, Supabase client correction, form patterns, middleware allowlist, security additions)_
