@@ -5,6 +5,13 @@ import { LoginForm } from "@/components/login-form";
 export const metadata: Metadata = {
   title: "Log in — Midgard",
   description: "Log in to your Midgard account.",
+  openGraph: {
+    title: "Log in — Midgard",
+    description: "Log in to your Midgard account.",
+    url: "/login",
+    images: ["/opengraph-image.png"],
+    type: "website",
+  },
 };
 
 async function PasswordResetMessage({

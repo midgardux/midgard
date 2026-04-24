@@ -3,7 +3,14 @@ import { SignUpForm } from "@/components/sign-up-form";
 
 export const metadata: Metadata = {
   title: "Sign up — Midgard",
-  description: "Create your Midgard account.",
+  description: "Create your Midgard account. First 3 Realms free, no credit card required.",
+  openGraph: {
+    title: "Sign up — Midgard",
+    description: "Create your Midgard account. First 3 Realms free, no credit card required.",
+    url: "/signup",
+    images: ["/opengraph-image.png"],
+    type: "website",
+  },
 };
 
 export default function SignUpPage() {

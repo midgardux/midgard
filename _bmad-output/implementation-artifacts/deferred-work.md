@@ -1,3 +1,11 @@
+## Deferred from: code review of 2-2-pricing-page-and-public-route-seo (2026-04-23)
+
+- `lastModified: new Date()` in `app/sitemap.ts` resolves at build time — every deploy marks all sitemap URLs as freshly modified regardless of actual content changes; degrades crawl budget efficiency. Revisit when sitemap grows or SEO fidelity becomes a priority.
+- `startsWith("/pricing")` in proxy.ts `isPublicPath` — any future route beginning with `/pricing` (e.g. `/pricing-admin`) would be silently made public; pattern is shared by all other public paths. Enforce stricter path matching or add a lint rule when protected routes are added.
+- `robots.ts` disallow list covers only `/projects/` and `/account/` rather than a broader `/(app)/*` catch-all — `(app)` route group not yet built (Epic 3); update the disallow list when Epic 3 creates the authenticated app shell.
+- (Cross-reference) `metadataBase` / `VERCEL_URL` OG URL mismatch: first logged in Story 1.1 code review. Story 2.2 confirms the issue is still present; resolve before production launch by aligning `metadataBase` with `NEXT_PUBLIC_SITE_URL`.
+- (Cross-reference) `?plan=pro` silently ignored: first logged in Story 2.1 code review. Story 6.2 must read this param post-email-verification and route the user into Stripe Checkout.
+
 ## Deferred from: code review of 2-1-marketing-landing-page (2026-04-22)
 
 - Landing page Pro CTA passes `?plan=pro` to `/signup`; Story 6.2 must read this param after email confirmation and route the verified user into Stripe Checkout before landing them in `/projects`.

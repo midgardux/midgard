@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-18"
-last_updated: "2026-04-22"  # updated by story 2.1 code-review
+last_updated: "2026-04-23"  # updated by story 2.2 code-review
 project: Midgard
 project_key: NOKEY
 tracking_system: file-system
@@ -60,7 +60,7 @@ development_status:
   # ─────────────────────────────────────────
   epic-2: in-progress
   2-1-marketing-landing-page: done
-  2-2-pricing-page-and-public-route-seo: backlog
+  2-2-pricing-page-and-public-route-seo: done
   epic-2-retrospective: optional
 
   # ─────────────────────────────────────────

@@ -4,6 +4,13 @@ import { ForgotPasswordForm } from "@/components/forgot-password-form";
 export const metadata: Metadata = {
   title: "Forgot password — Midgard",
   description: "Request a password reset link.",
+  openGraph: {
+    title: "Forgot password — Midgard",
+    description: "Request a password reset link.",
+    url: "/forgot-password",
+    images: ["/opengraph-image.png"],
+    type: "website",
+  },
 };
 
 export default function ForgotPasswordPage() {
