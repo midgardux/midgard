@@ -1,3 +1,13 @@
+## Deferred from: code review of 3-2-create-a-realm round 2 (2026-04-25)
+
+- `PROJECT_CAP_REACHED` sentinel string protocol — count embedded in error string as `PROJECT_CAP_REACHED:N`; fragile to parse and leaks the count via the raw error field. Correct fix: add a typed error variant to `ActionResult<T>`. Deferred until ActionResult is extended.
+- `subscription_tier` untyped string — any profile value not exactly `'free'` silently skips the cap check. Pre-existing schema typing concern; add a discriminated union to the `profiles` type when tightening subscription logic.
+- count=0 upgrade prompt copy — "You've built 0 Realms" when `cap=0` blocks all creation. Story 7.2 (free-tier cap runtime configuration) should address this edge case.
+
+## Deferred from: code review of 3-2-create-a-realm (2026-04-25)
+
+- TOCTOU cap race in `createProject` — count check and insert are two non-atomic round-trips; two concurrent free-tier requests can both pass the cap guard and both insert, exceeding the cap. Correct fix: a Postgres function that does count + insert atomically, or a DB-level constraint. **Required fix in Story 7.2** (free-tier cap runtime configuration) — do not mark optional.
+
 ## Deferred from: code review of 3-1-realm-list-view (2026-04-24)
 
 - RLS-only user scoping — `listProjects` relies entirely on Postgres RLS with no application-layer auth check; intentional per spec. Revisit if RLS configuration becomes non-obvious or when adding admin queries.

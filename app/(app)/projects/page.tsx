@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { listProjects } from '@/actions/projects'
+import { NewRealmForm } from '@/components/projects/NewRealmForm'
 
 export const metadata: Metadata = {
   title: 'Realms — Midgard',
@@ -29,33 +30,17 @@ export default async function ProjectsPage() {
 
   return (
     <main className="px-6 py-8 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <span className="font-mono text-xs uppercase tracking-widest text-mg-foreground-muted">
           Realms
         </span>
-        {!isEmpty && (
-          <button
-            disabled
-            aria-disabled="true"
-            aria-label="New Realm — available in next update"
-            className="bg-mg-accent text-mg-background font-mono text-xs uppercase tracking-wider px-4 py-2 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            New Realm
-          </button>
-        )}
+        {!isEmpty && <NewRealmForm variant="header" />}
       </div>
 
       {isEmpty ? (
         <div className="mt-16 flex flex-col items-center gap-4">
           <p className="font-sans text-mg-foreground-muted">Your first Realm awaits.</p>
-          <button
-            disabled
-            aria-disabled="true"
-            aria-label="Create your first Realm — available in next update"
-            className="bg-mg-accent text-mg-background font-mono text-xs uppercase tracking-wider px-4 py-2 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Create your first Realm
-          </button>
+          <NewRealmForm variant="empty-state" />
         </div>
       ) : (
         <ul className="space-y-2 mt-6">
