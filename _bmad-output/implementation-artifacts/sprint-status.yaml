@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-18"
-last_updated: "2026-04-24"  # updated by epic-2 retrospective
+last_updated: "2026-04-24"  # story 3-1 done
 project: Midgard
 project_key: NOKEY
 tracking_system: file-system
@@ -66,9 +66,9 @@ development_status:
   # ─────────────────────────────────────────
   # Epic 3: Realm Management
   # ─────────────────────────────────────────
-  epic-3: backlog
-  3-1-realm-list-view: backlog
-  3-2-create-a-realm: backlog
+  epic-3: in-progress
+  3-1-realm-list-view: done
+  3-2-create-a-realm: ready-for-dev
   3-3-open-and-revisit-a-realm: backlog
   3-4-delete-a-realm: backlog
   epic-3-retrospective: optional

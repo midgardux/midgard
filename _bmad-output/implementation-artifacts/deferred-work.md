@@ -1,3 +1,14 @@
+## Deferred from: code review of 3-1-realm-list-view (2026-04-24)
+
+- RLS-only user scoping — `listProjects` relies entirely on Postgres RLS with no application-layer auth check; intentional per spec. Revisit if RLS configuration becomes non-obvious or when adding admin queries.
+- `createServerClient` throws if Supabase env vars absent, bypassing middleware's `hasEnvVars` short-circuit. Pre-existing across all server actions; add a runtime env check utility when hardening for production.
+- `error.message` in `ActionResult` return exposes raw Supabase error strings (schema names, constraint names). Currently only used in a Server Component so it never reaches the client; scrub before any client-side caller is added.
+- `new Date(realm.created_at)` throws `RangeError` on a malformed timestamp string. Theoretical for Postgres timestamptz; add a try/catch or guard when date formatting is extracted to a shared utility.
+- No `not-found.tsx` or error boundary under `app/(app)/` — realm card 404s drop users onto the bare Next.js error page, losing AppNav chrome. Create `app/(app)/not-found.tsx` when building Story 5.1 workspace routes.
+- Logout form has no loading/pending state — double-submit dispatches two concurrent `signOut` calls. Pre-existing pattern; add `useFormStatus` or optimistic state when polishing the AppNav in a later story.
+- `(app)` layout has no server-side session guard — auth relies entirely on middleware. Add a `supabase.auth.getUser()` check in the layout as defense-in-depth before production launch.
+- `select('*')` in `listProjects` fetches all project columns; only `id`, `name`, `created_at` are rendered. Changing to column-specific select would require updating the `Project` type export; revisit when query performance becomes a concern.
+
 ## Deferred from: code review of 2-2-pricing-page-and-public-route-seo (2026-04-23)
 
 - `lastModified: new Date()` in `app/sitemap.ts` resolves at build time — every deploy marks all sitemap URLs as freshly modified regardless of actual content changes; degrades crawl budget efficiency. Revisit when sitemap grows or SEO fidelity becomes a priority.
