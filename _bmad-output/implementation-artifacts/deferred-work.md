@@ -1,3 +1,13 @@
+## Deferred from: code review of 3-3-open-and-revisit-a-realm (2026-04-25)
+
+- `getArtifacts` IDOR risk if artifacts RLS is misconfigured — exported function has no ownership assertion; relies entirely on DB-level RLS. Spec states this is enforced; verify RLS policy before production launch.
+- `getProject` PGRST116 conflates unauthenticated session blocks with not-found — absent session causes all rows to return PGRST116 → `notFound()` instead of sign-in redirect. Middleware should prevent this; revisit if auth guard is relaxed.
+- Non-PGRST116 DB errors in `getProject` surface as 404 not 500 — `if (!projectResult.success || ...) notFound()` swallows transient DB errors as not-found; spec-mandated pattern, known tradeoff.
+- Static `metadata` doesn't include project name in page title — workspace page uses static `robots`-only metadata; switch to `generateMetadata` when page title quality matters.
+- "Realm not found." copy in `app/(app)/not-found.tsx` is realm-specific — if other `(app)` routes call `notFound()`, the message will mislead; add route-specific `not-found.tsx` at deeper segment levels as needed.
+- `projectId` not validated as UUID format before Supabase query — malformed UUID triggers a Postgres type error handled gracefully (→ notFound()), but causes an unnecessary DB round-trip; add UUID validation when tightening input validation.
+- Root `app/not-found.tsx` missing — `notFound()` outside `(app)` falls through to bare Next.js 404; pre-existing, add `app/not-found.tsx` before production launch.
+
 ## Deferred from: code review of 3-2-create-a-realm round 2 (2026-04-25)
 
 - `PROJECT_CAP_REACHED` sentinel string protocol — count embedded in error string as `PROJECT_CAP_REACHED:N`; fragile to parse and leaks the count via the raw error field. Correct fix: add a typed error variant to `ActionResult<T>`. Deferred until ActionResult is extended.

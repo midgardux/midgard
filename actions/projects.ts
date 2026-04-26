@@ -5,6 +5,7 @@ import type { ActionResult } from '@/types/actions'
 import type { Tables } from '@/lib/supabase/types'
 
 export type Project = Tables<'projects'>
+export type Artifact = Tables<'artifacts'>
 
 export async function listProjects(): Promise<ActionResult<Project[]>> {
   const supabase = await createServerClient()
@@ -72,6 +73,34 @@ export async function createProject(name: string): Promise<ActionResult<Project>
 
   if (error) return { success: false, error: error.message }
   return { success: true, data }
+}
+
+export async function getProject(projectId: string): Promise<ActionResult<Project | null>> {
+  const supabase = await createServerClient()
+
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', projectId)
+    .single()
+
+  // PGRST116: no rows returned — RLS blocked (another user's realm) or does not exist
+  if (error?.code === 'PGRST116') return { success: true, data: null }
+  if (error) return { success: false, error: error.message }
+  return { success: true, data }
+}
+
+export async function getArtifacts(projectId: string): Promise<ActionResult<Artifact[]>> {
+  const supabase = await createServerClient()
+
+  const { data, error } = await supabase
+    .from('artifacts')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: true })
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: data ?? [] }
 }
 
 // TODO Story 3.4: deleteProject
