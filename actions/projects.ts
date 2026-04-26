@@ -103,4 +103,11 @@ export async function getArtifacts(projectId: string): Promise<ActionResult<Arti
   return { success: true, data: data ?? [] }
 }
 
-// TODO Story 3.4: deleteProject
+export async function deleteProject(projectId: string): Promise<ActionResult<void>> {
+  const supabase = await createServerClient()
+
+  const { error } = await supabase.rpc('delete_project', { p_project_id: projectId })
+
+  if (error) return { success: false, error: 'Failed to delete project. Please try again.' }
+  return { success: true, data: undefined }
+}

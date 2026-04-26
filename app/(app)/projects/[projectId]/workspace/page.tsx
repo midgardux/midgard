@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getProject, getArtifacts } from '@/actions/projects'
+import { DeleteRealmButton } from '@/components/projects/DeleteRealmButton'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -21,8 +22,9 @@ export default async function WorkspacePage({ params }: Props) {
 
   return (
     <main>
-      <div className="border-b border-mg-border px-6 py-3">
+      <div className="border-b border-mg-border px-6 py-3 flex items-center justify-between">
         <h1 className="font-sans text-mg-foreground font-medium text-sm">{project.name}</h1>
+        <DeleteRealmButton projectId={project.id} projectName={project.name} />
       </div>
       <div className="px-6 py-8">
         {artifacts.length === 0 ? (

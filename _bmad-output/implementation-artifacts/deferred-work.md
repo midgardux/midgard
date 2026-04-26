@@ -1,3 +1,8 @@
+## Deferred from: code review of 3-4-delete-a-realm (2026-04-25)
+
+- `CREATE OR REPLACE FUNCTION` in numbered migration `005_delete_project_rpc.sql` — idempotent creation is an anti-pattern in migration files; subsequent re-runs silently replace any manual changes. Migration already applied; revisit migration hygiene strategy before adding more RPC migrations.
+- `token_usage` RLS deletion relies on `user_id = auth.uid()` per row — if any `token_usage` row was written by a service role or admin, RLS silently blocks its deletion in `SECURITY INVOKER` context, leaving orphaned rows after the parent project is removed. Revisit when token_usage write paths are extended beyond the authenticated user's own requests.
+
 ## Deferred from: code review of 3-3-open-and-revisit-a-realm (2026-04-25)
 
 - `getArtifacts` IDOR risk if artifacts RLS is misconfigured — exported function has no ownership assertion; relies entirely on DB-level RLS. Spec states this is enforced; verify RLS policy before production launch.
