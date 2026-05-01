@@ -273,6 +273,7 @@ _No blockers encountered._
 ## Change Log
 
 - 2026-04-24: Implemented Story 3.1 — created `(app)/` route group, AppNav layout, `listProjects` server action, Realm list page with empty/populated states; TypeScript and lint pass; unauthenticated redirect verified; 4 manual browser checks pending Jason's sign-off
+- 2026-04-26: All manual browser checks (4.5–4.8) verified by Jason — all passed
 
 ## Review Findings
 

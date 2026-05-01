@@ -416,3 +416,4 @@ Fixed `react/no-unescaped-entities` ESLint error in `UpgradePrompt` — escaped 
 ## Change Log
 
 - 2026-04-24: Story 3.2 implemented — `createProject` action, `NewRealmForm` component, projects page updated. TypeScript and ESLint pass. Ready for code review and manual validation.
+- 2026-04-26: All manual browser checks (4.4–4.8) verified by Jason — all passed, including free-tier cap gate (4.5) and Pro tier bypass (4.8)

@@ -318,6 +318,7 @@ claude-sonnet-4-6
 ### Change Log
 
 - 2026-04-25: Implemented story — added `Artifact` type, `getProject`, `getArtifacts` to `actions/projects.ts`; created `app/(app)/not-found.tsx` (resolves deferred item from Story 3.1); created workspace page at `app/(app)/projects/[projectId]/workspace/page.tsx`. Automated checks pass (tsc, lint, dev server). Manual browser tests 4.4–4.7 pending.
+- 2026-04-26: All manual browser checks (4.4–4.7) verified by Jason — all passed, including RLS cross-user block (4.6) and fake UUID not-found (4.7)
 
 ### Review Findings
 
