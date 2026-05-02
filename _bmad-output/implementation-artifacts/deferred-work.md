@@ -1,3 +1,13 @@
+## Deferred from: code review of 4-1-attentionregion-and-button-hierarchy-components (2026-05-01)
+
+- Title focus ring uses `focus:outline` instead of `focus-visible:outline` (`AttentionRegion.tsx:82`) — `:focus-visible` is suppressed by browsers for programmatic `.focus()` calls before any keyboard interaction occurs, which would remove the visible ring on initial trap activation. Using plain `:focus` is intentional; revisit if a cross-browser solution for programmatic focus-visible emerges.
+- `role="region"` without accessible name when `aria-label` prop not provided (`AttentionRegion.tsx:70-73`) — `aria-label` is intentionally optional per spec; unnamed landmarks are invisible to screen reader navigation. Revisit when enforcing `aria-label` on `info`/`confirm` variants.
+- MidgardButton icon-only accessible name enforcement (`MidgardButton.tsx:6-8`) — component passes through `aria-label` via `...props` but TypeScript does not require it; icon-only Nano buttons (Story 5+) will be silently inaccessible. Add a typed constraint or lint rule before Nano tier is used for icon-only controls.
+- Concurrent rendering / Suspense focus timing in `AttentionRegion` `useEffect` (`AttentionRegion.tsx:41-46`) — initial focus fires after React commit; lazy-loaded children may not yet be in the DOM. Revisit if `AttentionRegion` is ever wrapped in a Suspense boundary.
+- `cn()` allows callers to override `disabled:opacity-40`/`disabled:cursor-not-allowed` in `MidgardButton` — inherent Tailwind class-merge limitation; callers can silently break disabled affordance. Consider a HOC or CSS layer if this becomes a pattern.
+- `FOCUSABLE` selector missing `contenteditable` and `details > summary` elements (`AttentionRegion.tsx:24`) — both are natively focusable but excluded from the trap; Tab can escape through them. Revisit if rich-text or collapsible content is added to `AttentionRegion`.
+- `useEffect` dependency array omits `regionRef`/`titleRef` (`AttentionRegion.tsx:66`) — refs are stable objects, `exhaustive-deps` will not flag; low risk. Revisit if component is structurally refactored.
+
 ## Deferred from: code review of 3-4-delete-a-realm (2026-04-25)
 
 - `CREATE OR REPLACE FUNCTION` in numbered migration `005_delete_project_rpc.sql` — idempotent creation is an anti-pattern in migration files; subsequent re-runs silently replace any manual changes. Migration already applied; revisit migration hygiene strategy before adding more RPC migrations.
