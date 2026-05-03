@@ -1,3 +1,10 @@
+## Deferred from: code review of 4-2-brief-input-surface (2026-05-02)
+
+- Extension-only file type validation (no MIME/magic-byte check in `actions/analysis.ts:18`) — trivially bypassed by renaming files; address before Story 4.5 ships the AI pipeline.
+- Global Zustand singleton state leak across multiple open project tabs — requires context-provider pattern refactor; out of scope for this story.
+- `phase='loading'` + server revalidation race: if `hasArtifacts` becomes true mid-loading transition, loading screen may persist depending on timing (`WorkspaceShell.tsx:26-43`) — not triggerable with stub action; revisit in Story 4.5.
+- `×` close button character (U+00D7) rendering inconsistency across monospace fonts — cosmetic; consider SVG icon or U+2715 in a future polish pass.
+
 ## Deferred from: code review of 4-1-attentionregion-and-button-hierarchy-components (2026-05-01)
 
 - Title focus ring uses `focus:outline` instead of `focus-visible:outline` (`AttentionRegion.tsx:82`) — `:focus-visible` is suppressed by browsers for programmatic `.focus()` calls before any keyboard interaction occurs, which would remove the visible ring on initial trap activation. Using plain `:focus` is intentional; revisit if a cross-browser solution for programmatic focus-visible emerges.

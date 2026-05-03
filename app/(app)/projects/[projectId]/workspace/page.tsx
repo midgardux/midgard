@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getProject, getArtifacts } from '@/actions/projects'
 import { DeleteRealmButton } from '@/components/projects/DeleteRealmButton'
+import { WorkspaceShell } from '@/components/workspace/WorkspaceShell'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -26,23 +27,11 @@ export default async function WorkspacePage({ params }: Props) {
         <h1 className="font-sans text-mg-foreground font-medium text-sm">{project.name}</h1>
         <DeleteRealmButton projectId={project.id} projectName={project.name} />
       </div>
-      <div className="px-6 py-8">
-        {artifacts.length === 0 ? (
-          // Story 4.2 replaces this with <BriefInputSurface />
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <p className="font-mono text-xs text-mg-foreground-muted">No artifacts yet.</p>
-          </div>
-        ) : (
-          // Story 5.1 replaces this with <ArtifactWorkspace />
-          <ul className="space-y-1">
-            {artifacts.map((artifact) => (
-              <li key={artifact.id} className="font-mono text-xs text-mg-foreground-muted">
-                /{artifact.artifact_type || 'unknown'}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <WorkspaceShell
+        projectId={project.id}
+        projectName={project.name}
+        hasArtifacts={artifacts.length > 0}
+      />
     </main>
   )
 }
