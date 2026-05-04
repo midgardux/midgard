@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { BriefInputSurface } from '@/components/workspace/BriefInputSurface'
+import { AllFatherLoadingState } from '@/components/workspace/AllFatherLoadingState'
+import { cn } from '@/lib/utils'
 
 interface WorkspaceShellProps {
   projectId: string
@@ -14,6 +16,19 @@ export function WorkspaceShell({ projectId, hasArtifacts }: WorkspaceShellProps)
   const phase = useWorkspaceStore((s) => s.phase)
   const setPhase = useWorkspaceStore((s) => s.setPhase)
 
+  const prevPhaseRef = useRef(phase)
+  const [isFading, setIsFading] = useState(false)
+
+  useEffect(() => {
+    if (prevPhaseRef.current === 'loading' && phase === 'workspace') {
+      setIsFading(true)
+      const t = setTimeout(() => setIsFading(false), 300)
+      prevPhaseRef.current = phase
+      return () => clearTimeout(t)
+    }
+    prevPhaseRef.current = phase
+  }, [phase])
+
   useEffect(() => {
     if (hasArtifacts) {
       setPhase('workspace')
@@ -23,10 +38,10 @@ export function WorkspaceShell({ projectId, hasArtifacts }: WorkspaceShellProps)
     }
   }, [hasArtifacts, setPhase])
 
-  if (phase === 'loading') {
+  if (phase === 'loading' || isFading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="font-mono text-xs text-mg-foreground-muted">The Allfather works…</p>
+      <div className={cn('transition-opacity duration-300', isFading ? 'opacity-0' : 'opacity-100')}>
+        <AllFatherLoadingState />
       </div>
     )
   }

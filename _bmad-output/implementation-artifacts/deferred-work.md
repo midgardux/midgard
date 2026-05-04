@@ -1,3 +1,9 @@
+## Deferred from: code review of 4-4-allfather-loading-state-component-and-norse-microcopy (2026-05-04)
+
+- Text cycling fade (500ms) > outer crossfade window (300ms) — if a text cycle fade starts simultaneously with a phase transition, the invocation text is at intermediate opacity when the container fades out, causing a visual flicker (`WorkspaceShell.tsx:25` / `AllFatherLoadingState.tsx:13`).
+- `reducedMotion` SSR/hydration flash — component initializes `reducedMotion=false` and corrects it in `useEffect`; first render always shows non-reduced-motion classes, causing a potential flash and hydration mismatch on SSR paths (`AllFatherLoadingState.tsx:20`).
+- Fast Concurrent React phase transitions can bypass `prevPhaseRef` update — if `phase` changes `input→loading→workspace` in rapid succession, the effect may see only `workspace` with `prevPhaseRef` still holding `input`, silently skipping the crossfade (`WorkspaceShell.tsx:22-30`).
+
 ## Deferred from: code review of 4-3-input-quality-gate (2026-05-03)
 
 - Singleton Anthropic client untestable; module-level `_client` has no reset mechanism, bleeds state between test runs (`lib/claude/client.ts`).
