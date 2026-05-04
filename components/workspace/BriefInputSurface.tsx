@@ -22,15 +22,56 @@ export function BriefInputSurface({ projectId }: { projectId: string }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [qualityGateState, setQualityGateState] = useState<{
+    questions: string[]
+    answers: string
+    attempt: number
+  } | null>(null)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (isPending) return
     setError(null)
+    setQualityGateState(null)
 
     const formData = new FormData()
     formData.append('text', briefText.trim())
+    formData.append('attempt', '0')
     if (selectedFile) formData.append('file', selectedFile)
+
+    startTransition(async () => {
+      try {
+        const result = await submitBrief(projectId, formData)
+        if (!result.success) {
+          setError(result.error)
+          return
+        }
+        if (result.data.qualityGate) {
+          setQualityGateState({
+            questions: result.data.qualityGate.questions,
+            answers: '',
+            attempt: result.data.qualityGate.attempt,
+          })
+          return
+        }
+        setPhase('loading')
+      } catch {
+        setError('Something went wrong. Please try again.')
+      }
+    })
+  }
+
+  function handleQualityGateSubmit() {
+    if (isPending || !qualityGateState) return
+    setError(null)
+    const enrichedText = `${briefText.trim()}\n\n${qualityGateState.answers.trim()}`
+
+    const formData = new FormData()
+    formData.append('text', enrichedText)
+    formData.append('attempt', '1')
+    if (selectedFile) formData.append('file', selectedFile)
+
+    setQualityGateState(null)
 
     startTransition(async () => {
       try {
@@ -95,7 +136,7 @@ export function BriefInputSurface({ projectId }: { projectId: string }) {
             placeholder="Describe your product to the Allfather."
             value={briefText}
             onChange={(e) => setBriefText(e.target.value)}
-            disabled={isPending}
+            disabled={isPending && !qualityGateState}
           />
         </div>
 
@@ -154,6 +195,41 @@ export function BriefInputSurface({ projectId }: { projectId: string }) {
           />
         </div>
       </form>
+
+      {qualityGateState && (
+        <div className="mt-3">
+          <AttentionRegion
+            variant="info"
+            title="The Allfather needs more context."
+            trapFocus={true}
+            aria-label="Quality gate — additional context required"
+          >
+            {qualityGateState.questions.map((q, i) => (
+              <p key={i} className="font-mono text-xs text-mg-foreground mb-3">{q}</p>
+            ))}
+            <textarea
+              className="font-mono text-[13px] bg-mg-surface text-mg-foreground placeholder:text-mg-foreground-subtle border border-mg-border w-full min-h-[80px] resize-y p-3 focus:outline-none focus:border-mg-foreground-subtle disabled:opacity-50 rounded-none mt-1"
+              placeholder="Answer here…"
+              aria-label="Your answers to the questions above"
+              value={qualityGateState.answers}
+              onChange={(e) =>
+                setQualityGateState((s) => (s ? { ...s, answers: e.target.value } : null))
+              }
+              disabled={isPending}
+            />
+            <div className="flex items-center gap-3 mt-3">
+              <MidgardButton
+                tier="primary"
+                type="button"
+                disabled={isPending || !qualityGateState.answers.trim()}
+                onClick={handleQualityGateSubmit}
+              >
+                CONTINUE
+              </MidgardButton>
+            </div>
+          </AttentionRegion>
+        </div>
+      )}
     </div>
   )
 }

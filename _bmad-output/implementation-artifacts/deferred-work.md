@@ -1,3 +1,12 @@
+## Deferred from: code review of 4-3-input-quality-gate (2026-05-03)
+
+- Singleton Anthropic client untestable; module-level `_client` has no reset mechanism, bleeds state between test runs (`lib/claude/client.ts`).
+- API key read once at `Anthropic` construction; stale client persists if `ANTHROPIC_API_KEY` is rotated at runtime without a process restart (`lib/claude/client.ts`).
+- Model string `claude-haiku-4-5-20251001` hardcoded with no constant or env override (`lib/claude/quality-gate.ts`).
+- Enriched brief appends answers without a label or delimiter; the retry model receives an unlabeled context block — labeling should be addressed when Story 4.5 builds the full analysis prompt (`actions/analysis.ts`).
+- Fence-removal regex only strips leading/trailing code fences; mid-string fences would still break JSON parsing — low probability with current model/prompt (`lib/claude/quality-gate.ts:44`).
+- `QualityGateChallenge.attempt` is always returned as `0` from the server and stored in component state but never consumed in FormData; dead field could mislead future maintainers (`actions/analysis.ts`, `components/workspace/BriefInputSurface.tsx`).
+
 ## Deferred from: code review of 4-2-brief-input-surface (2026-05-02)
 
 - Extension-only file type validation (no MIME/magic-byte check in `actions/analysis.ts:18`) — trivially bypassed by renaming files; address before Story 4.5 ships the AI pipeline.

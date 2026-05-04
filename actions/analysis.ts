@@ -3,6 +3,7 @@
 import type { ActionResult } from '@/types/actions'
 import { parseDocx } from '@/lib/parsers/docx'
 import { parsePdf } from '@/lib/parsers/pdf'
+import { assessBriefQuality } from '@/lib/claude/quality-gate'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 
@@ -14,14 +15,21 @@ const ALLOWED_MIME_TYPES = [
   'text/x-markdown',
 ]
 
+export type QualityGateChallenge = {
+  questions: string[]
+  attempt: number
+}
+
 export async function submitBrief(
   projectId: string,
   formData: FormData
-): Promise<ActionResult<{ briefText: string }>> {
+): Promise<ActionResult<{ briefText: string; qualityGate?: QualityGateChallenge }>> {
   if (!projectId?.trim()) return { success: false, error: 'Invalid project.' }
 
   const text = ((formData.get('text') as string | null) ?? '').trim()
   const file = formData.get('file') as File | null
+  const attempt = parseInt((formData.get('attempt') as string | null) ?? '0', 10)
+  if (isNaN(attempt)) return { success: false, error: 'Invalid request.' }
 
   let briefText: string
 
@@ -55,7 +63,17 @@ export async function submitBrief(
 
   if (!briefText) return { success: false, error: 'Brief text is required.' }
 
-  // Story 4.3 adds: quality gate check
+  if (attempt < 1) {
+    const gateResult = await assessBriefQuality(briefText)
+    if (!gateResult.success) return gateResult
+    if (!gateResult.data.passes) {
+      return {
+        success: true,
+        data: { briefText, qualityGate: { questions: gateResult.data.questions, attempt: 0 } },
+      }
+    }
+  }
+
   // Story 4.5 adds: AI analysis pipeline, artifact storage, token tracking
   return { success: true, data: { briefText } }
 }
