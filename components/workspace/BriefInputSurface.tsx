@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef, useState, useTransition } from 'react'
-import { submitBrief } from '@/actions/analysis'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { submitBrief, runAnalysis } from '@/actions/analysis'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { MidgardButton } from '@/components/workspace/MidgardButton'
 import { AttentionRegion } from '@/components/workspace/AttentionRegion'
@@ -16,6 +17,9 @@ function getExt(filename: string): string {
 export function BriefInputSurface({ projectId }: { projectId: string }) {
   const [isPending, startTransition] = useTransition()
   const setPhase = useWorkspaceStore((s) => s.setPhase)
+  const setAnalysisError = useWorkspaceStore((s) => s.setAnalysisError)
+  const setShowDisclosure = useWorkspaceStore((s) => s.setShowDisclosure)
+  const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [briefText, setBriefText] = useState('')
@@ -27,6 +31,14 @@ export function BriefInputSurface({ projectId }: { projectId: string }) {
     answers: string
     attempt: number
   } | null>(null)
+
+  useEffect(() => {
+    const stored = useWorkspaceStore.getState().analysisError
+    if (stored) {
+      setError(stored)
+      setAnalysisError(null)
+    }
+  }, [setAnalysisError])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -54,8 +66,20 @@ export function BriefInputSurface({ projectId }: { projectId: string }) {
           })
           return
         }
+
         setPhase('loading')
+
+        const analysisResult = await runAnalysis(projectId, result.data.briefText)
+        if (!analysisResult.success) {
+          setAnalysisError(analysisResult.error)
+          setPhase('input')
+          return
+        }
+
+        if (analysisResult.data.showDisclosure) setShowDisclosure(true)
+        router.refresh()
       } catch {
+        setPhase('input')
         setError('Something went wrong. Please try again.')
       }
     })
@@ -64,7 +88,7 @@ export function BriefInputSurface({ projectId }: { projectId: string }) {
   function handleQualityGateSubmit() {
     if (isPending || !qualityGateState) return
     setError(null)
-    const enrichedText = `${briefText.trim()}\n\n${qualityGateState.answers.trim()}`
+    const enrichedText = `${briefText.trim()}\n\n---\nAdditional context:\n${qualityGateState.answers.trim()}`
 
     const formData = new FormData()
     formData.append('text', enrichedText)
@@ -80,8 +104,20 @@ export function BriefInputSurface({ projectId }: { projectId: string }) {
           setError(result.error)
           return
         }
+
         setPhase('loading')
+
+        const analysisResult = await runAnalysis(projectId, result.data.briefText)
+        if (!analysisResult.success) {
+          setAnalysisError(analysisResult.error)
+          setPhase('input')
+          return
+        }
+
+        if (analysisResult.data.showDisclosure) setShowDisclosure(true)
+        router.refresh()
       } catch {
+        setPhase('input')
         setError('Something went wrong. Please try again.')
       }
     })

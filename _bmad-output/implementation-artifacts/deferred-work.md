@@ -1,3 +1,17 @@
+## Deferred from: code review of 4-5-ai-analysis-pipeline-four-artifact-generation round 2 (2026-05-05)
+
+- `WorkspaceShell` cleanup `() => setPhase('input')` fires on every unmount — if the user navigates away from the workspace page and returns, the phase resets to `'input'` briefly before the mount effect restores it to `'workspace'`, causing a flash of the brief input form (`components/workspace/WorkspaceShell.tsx:40-42`).
+- `has_seen_disclosure` DB update failure still returns `showDisclosure: true` — if the Supabase `profiles` update fails transiently (network blip, RLS), the flag stays `false` in the DB while the client shows the disclosure banner; on every subsequent analysis the server reads `has_seen_disclosure = false` again and returns `showDisclosure: true`, re-showing the banner indefinitely (`actions/analysis.ts`).
+
+## Deferred from: code review of 4-5-ai-analysis-pipeline-four-artifact-generation (2026-05-04)
+
+- No per-call timeout on `Promise.all` for Claude calls — if one call hangs, the entire analysis hangs until platform function timeout kills it, leaving the client permanently on the loading screen (`lib/claude/analyze.ts:44`).
+- `router.refresh()` has no error callback in Next.js — silent refresh failure leaves the user stuck on the loading screen with no recovery path; no standard fix available at the framework level (`components/workspace/BriefInputSurface.tsx:75`).
+- Supabase `.single()` no-row edge case for profiles — if a user's profile row is missing, `has_seen_disclosure` defaults to `false` and the update is a silent no-op; disclosure banner shows on every analysis run for that user (`actions/analysis.ts:95`).
+- `hadSeenDisclosure` concurrent analysis race — two parallel submissions both read `has_seen_disclosure = false` before either updates it, causing both to return `showDisclosure: true` and show the banner twice (`actions/analysis.ts:95`).
+- Role name consistency across prompts enforced only by prompt wording — the four Claude calls are independent and may produce inconsistently named roles (e.g. "Product Manager" vs "Manager"), breaking any downstream role-filter UI (`lib/claude/analyze.ts`). Cross-validate role names post-parse when Epic 5 RoleFilterToggle is built.
+- `stop_reason: 'max_tokens'` produces a truncated JSON fragment with no logging — parse failure is indistinguishable from a malformed model response; add `stop_reason` check and log before treating as a generic error (`lib/claude/analyze.ts:62`).
+
 ## Deferred from: code review of 4-4-allfather-loading-state-component-and-norse-microcopy (2026-05-04)
 
 - Text cycling fade (500ms) > outer crossfade window (300ms) — if a text cycle fade starts simultaneously with a phase transition, the invocation text is at intermediate opacity when the container fades out, causing a visual flicker (`WorkspaceShell.tsx:25` / `AllFatherLoadingState.tsx:13`).

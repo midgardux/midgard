@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-18"
-last_updated: "2026-05-04"  # story 4-4 done
+last_updated: "2026-05-04"  # story 4-5 done
 project: Midgard
 project_key: NOKEY
 tracking_system: file-system
@@ -81,7 +81,7 @@ development_status:
   4-2-brief-input-surface: done
   4-3-input-quality-gate: done
   4-4-allfather-loading-state-component-and-norse-microcopy: done
-  4-5-ai-analysis-pipeline-four-artifact-generation: backlog
+  4-5-ai-analysis-pipeline-four-artifact-generation: done
   epic-4-retrospective: optional
 
   # ─────────────────────────────────────────
