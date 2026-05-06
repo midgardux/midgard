@@ -22,16 +22,16 @@ export default async function WorkspacePage({ params }: Props) {
   const artifacts = artifactsResult.success ? artifactsResult.data : []
 
   return (
-    <main>
-      <div className="border-b border-mg-border px-6 py-3 flex items-center justify-between">
-        <h1 className="font-sans text-mg-foreground font-medium text-sm">{project.name}</h1>
+    <>
+      <div className="sticky top-[46px] z-10 bg-mg-background h-[46px] border-b border-mg-border px-4 flex items-center justify-between flex-shrink-0">
+        <h1 className="font-mono text-xs text-mg-foreground">{project.name}</h1>
         <DeleteRealmButton projectId={project.id} projectName={project.name} />
       </div>
       <WorkspaceShell
         projectId={project.id}
         projectName={project.name}
-        hasArtifacts={artifacts.length > 0}
+        artifacts={artifacts}
       />
-    </main>
+    </>
   )
 }

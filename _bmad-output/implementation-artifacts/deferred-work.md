@@ -1,3 +1,11 @@
+## Deferred from: code review of 5-1-artifactworkspace-layout-and-two-panel-structure (2026-05-05)
+
+- `<main>` landmark removed from `workspace/page.tsx` per spec (Task 5.4 height-calc requirement); no `<main>` landmark on workspace page for assistive technology; consider `dvh` units to restore landmark without breaking layout.
+- Tablet tray focus not trapped — backdrop captures mouse clicks but keyboard focus can Tab behind the overlay; no interactive content in stub defers the risk; add focus trap in Story 5.2 when panel items are added (`components/workspace/ArtifactWorkspace.tsx`).
+- `mobileNavOpen` state not reset on viewport resize — state persists if user opens mobile nav then widens to tablet/desktop, leaving `aria-controls` pointing to a hidden element (`components/workspace/ArtifactWorkspace.tsx`).
+- Stale Zustand `phase` on cross-project navigation — navigating from a workspace-phase project to a new project may briefly render `ArtifactWorkspace` with empty artifacts before mount effect resets phase; related to existing WorkspaceShell cleanup defer (`components/workspace/WorkspaceShell.tsx`).
+- `h-[calc(100vh-92px)]` and `top: 92px` clip content on mobile browsers with dynamic toolbars — `100vh` excludes browser chrome on iOS Safari / Chrome Android; address in Story 5.6 responsive polish pass (`components/workspace/ArtifactWorkspace.tsx`).
+
 ## Deferred from: code review of 4-5-ai-analysis-pipeline-four-artifact-generation round 2 (2026-05-05)
 
 - `WorkspaceShell` cleanup `() => setPhase('input')` fires on every unmount — if the user navigates away from the workspace page and returns, the phase resets to `'input'` briefly before the mount effect restores it to `'workspace'`, causing a flash of the brief input form (`components/workspace/WorkspaceShell.tsx:40-42`).

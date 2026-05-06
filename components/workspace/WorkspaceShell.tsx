@@ -4,21 +4,20 @@ import { useEffect, useRef, useState } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { BriefInputSurface } from '@/components/workspace/BriefInputSurface'
 import { AllFatherLoadingState } from '@/components/workspace/AllFatherLoadingState'
-import { AttentionRegion } from '@/components/workspace/AttentionRegion'
-import { MidgardButton } from '@/components/workspace/MidgardButton'
+import { ArtifactWorkspace } from '@/components/workspace/ArtifactWorkspace'
 import { cn } from '@/lib/utils'
+import type { Artifact } from '@/actions/projects'
 
 interface WorkspaceShellProps {
   projectId: string
-  hasArtifacts: boolean
   projectName: string
+  artifacts: Artifact[]
 }
 
-export function WorkspaceShell({ projectId, hasArtifacts }: WorkspaceShellProps) {
+export function WorkspaceShell({ projectId, artifacts }: WorkspaceShellProps) {
+  const hasArtifacts = artifacts.length > 0
   const phase = useWorkspaceStore((s) => s.phase)
   const setPhase = useWorkspaceStore((s) => s.setPhase)
-  const showDisclosure = useWorkspaceStore((s) => s.showDisclosure)
-  const setShowDisclosure = useWorkspaceStore((s) => s.setShowDisclosure)
 
   const prevPhaseRef = useRef(phase)
   const [isFading, setIsFading] = useState(false)
@@ -51,27 +50,7 @@ export function WorkspaceShell({ projectId, hasArtifacts }: WorkspaceShellProps)
   }
 
   if (phase === 'workspace') {
-    return (
-      <div>
-        {showDisclosure && (
-          <div className="px-6 pt-4">
-            <AttentionRegion variant="info" title="A note about your data">
-              <p className="font-mono text-xs text-mg-foreground">
-                Your input is processed by Anthropic&apos;s API and is not used to train models.
-              </p>
-              <div className="mt-3">
-                <MidgardButton tier="ghost" type="button" onClick={() => setShowDisclosure(false)}>
-                  Dismiss
-                </MidgardButton>
-              </div>
-            </AttentionRegion>
-          </div>
-        )}
-        <div className="font-mono text-xs text-mg-foreground-muted p-6">
-          Artifacts ready. (Story 5.1)
-        </div>
-      </div>
-    )
+    return <ArtifactWorkspace artifacts={artifacts} />
   }
 
   return <BriefInputSurface projectId={projectId} />
