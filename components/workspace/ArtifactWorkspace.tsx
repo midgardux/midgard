@@ -20,9 +20,10 @@ const ARTIFACT_LABELS: Record<ArtifactType, string> = {
 
 interface ArtifactWorkspaceProps {
   artifacts: Artifact[]
+  projectId: string
 }
 
-export function ArtifactWorkspace({ artifacts }: ArtifactWorkspaceProps) {
+export function ArtifactWorkspace({ artifacts, projectId }: ArtifactWorkspaceProps) {
   const showDisclosure = useWorkspaceStore((s) => s.showDisclosure)
   const setShowDisclosure = useWorkspaceStore((s) => s.setShowDisclosure)
   const activeArtifact = useWorkspaceStore((s) => s.activeArtifact)
@@ -47,7 +48,7 @@ export function ArtifactWorkspace({ artifacts }: ArtifactWorkspaceProps) {
         className="flex-shrink-0 border-r border-mg-border overflow-y-auto tablet:hidden"
         style={{ width: 'var(--index-panel-width)' }}
       >
-        <ArtifactIndexPanel artifacts={artifacts} />
+        <ArtifactIndexPanel artifacts={artifacts} projectId={projectId} />
       </div>
 
       {/* Tablet icon strip */}
@@ -89,7 +90,7 @@ export function ArtifactWorkspace({ artifacts }: ArtifactWorkspaceProps) {
               width: 'var(--index-panel-width)',
             }}
           >
-            <ArtifactIndexPanel artifacts={artifacts} onSelect={() => setTrayOpen(false)} />
+            <ArtifactIndexPanel artifacts={artifacts} projectId={projectId} onSelect={() => setTrayOpen(false)} />
           </div>
         </>
       )}
@@ -108,7 +109,7 @@ export function ArtifactWorkspace({ artifacts }: ArtifactWorkspaceProps) {
           </button>
           {mobileNavOpen && (
             <div id="mobile-artifact-nav">
-              <ArtifactIndexPanel artifacts={artifacts} onSelect={() => setMobileNavOpen(false)} />
+              <ArtifactIndexPanel artifacts={artifacts} projectId={projectId} onSelect={() => setMobileNavOpen(false)} />
             </div>
           )}
         </div>

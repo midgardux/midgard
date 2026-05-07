@@ -50,7 +50,7 @@ export function WorkspaceShell({ projectId, artifacts }: WorkspaceShellProps) {
   }
 
   if (phase === 'workspace') {
-    return <ArtifactWorkspace artifacts={artifacts} />
+    return <ArtifactWorkspace artifacts={artifacts} projectId={projectId} />
   }
 
   return <BriefInputSurface projectId={projectId} />

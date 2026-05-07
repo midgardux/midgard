@@ -1,3 +1,7 @@
+## Deferred from: code review of 5-4-rolefiltertoggle (2026-05-07)
+
+- Role string case/whitespace inconsistency produces duplicate chips — if AI generates roles with inconsistent casing (e.g. `"Dev"` vs `"dev"`), `Set`-based deduplication treats them as distinct; clicking one chip won't match sections tagged with the other case variant (`components/workspace/RoleFilterToggle.tsx`, `allRoles` useMemo).
+
 ## Deferred from: code review of 5-3-artifactcontent-and-artifactsection-components (2026-05-06)
 
 - Whitespace-only `section.body` renders as non-pending blank content — `pending={!section.body}` is falsy for `""` but truthy for `"  "`, which silently renders a blank body without the "Not yet written." label (`components/workspace/ArtifactContent.tsx:40`).

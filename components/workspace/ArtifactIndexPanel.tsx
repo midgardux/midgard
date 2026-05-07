@@ -17,11 +17,12 @@ const ARTIFACT_LABELS: Record<ArtifactType, string> = {
 
 interface ArtifactIndexPanelProps {
   artifacts: Artifact[]
+  projectId: string
   onSelect?: () => void
   className?: string
 }
 
-export function ArtifactIndexPanel({ artifacts, onSelect, className }: ArtifactIndexPanelProps) {
+export function ArtifactIndexPanel({ artifacts, projectId, onSelect, className }: ArtifactIndexPanelProps) {
   const activeArtifact = useWorkspaceStore((s) => s.activeArtifact)
   const setActiveArtifact = useWorkspaceStore((s) => s.setActiveArtifact)
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -53,7 +54,7 @@ export function ArtifactIndexPanel({ artifacts, onSelect, className }: ArtifactI
         <span className="font-mono text-[10px] uppercase tracking-widest text-mg-foreground-subtle">Artifacts</span>
         <span className="font-mono text-[10px] text-mg-foreground-subtle">{artifacts.length}</span>
       </div>
-      <RoleFilterToggle artifacts={artifacts} />
+      <RoleFilterToggle artifacts={artifacts} projectId={projectId} />
       <ul role="list">
         {ARTIFACT_TYPES.map((type, index) => (
           <li key={type}>
