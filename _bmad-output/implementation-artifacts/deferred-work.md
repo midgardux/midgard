@@ -1,3 +1,11 @@
+## Deferred from: code review of 5-3-artifactcontent-and-artifactsection-components (2026-05-06)
+
+- Whitespace-only `section.body` renders as non-pending blank content — `pending={!section.body}` is falsy for `""` but truthy for `"  "`, which silently renders a blank body without the "Not yet written." label (`components/workspace/ArtifactContent.tsx:40`).
+- Empty `sections` array produces blank content panel with no feedback — if `artifactData.sections` is `[]`, the map produces nothing and the user sees only the sticky header with no body and no empty-state message (`components/workspace/ArtifactContent.tsx`).
+- `section.figureNumber` null/undefined renders empty accent span — type declares `figureNumber: string` but runtime malformed data could be null/empty, breaking visual alignment with no fallback (`components/workspace/ArtifactSection.tsx:22`).
+- `artifact.created_at` null/invalid renders "Invalid Date" in ContentHeader — `new Date(undefined)` produces `Invalid Date`; `toLocaleDateString` renders it verbatim in the header (`components/workspace/ArtifactContent.tsx`).
+- `section.id` empty/non-unique causes `headingId` collision and React `key` conflict — identical IDs break the `aria-labelledby` pointer and React reconciler may produce unexpected DOM mutations (`components/workspace/ArtifactSection.tsx:13`).
+
 ## Deferred from: code review of 5-2-artifactindexpanel-and-navigation (2026-05-06)
 
 - `itemRefs.current` stale refs if `ARTIFACT_TYPES` ever shrinks — `ArrowDown`/`ArrowUp` would silently call `.focus()` on a detached DOM node for that slot, breaking wrap-around nav; not applicable while the list is a fixed constant (`components/workspace/ArtifactIndexPanel.tsx`).
