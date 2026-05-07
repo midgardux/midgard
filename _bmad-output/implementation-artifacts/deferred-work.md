@@ -1,3 +1,9 @@
+## Deferred from: code review of 5-2-artifactindexpanel-and-navigation (2026-05-06)
+
+- `itemRefs.current` stale refs if `ARTIFACT_TYPES` ever shrinks — `ArrowDown`/`ArrowUp` would silently call `.focus()` on a detached DOM node for that slot, breaking wrap-around nav; not applicable while the list is a fixed constant (`components/workspace/ArtifactIndexPanel.tsx`).
+- `artifact_type` DB column is an untyped `string` — `ArtifactType` union is only enforced at the app layer; a legacy or misspelled DB row produces an invisible missing entry in the index panel with no error; validate or cast at the data-fetch boundary before adding role filtering in Story 5.4 (`lib/supabase/types.ts`).
+- `ArtifactContent` renders `/{activeArtifact}` when no matching artifact exists in `artifacts[]` — upstream `phase = 'workspace'` guard makes this unreachable in practice; Story 5.3 replaces this entire body and should include an empty-state guard (`components/workspace/ArtifactContent.tsx`).
+
 ## Deferred from: code review of 5-1-artifactworkspace-layout-and-two-panel-structure (2026-05-05)
 
 - `<main>` landmark removed from `workspace/page.tsx` per spec (Task 5.4 height-calc requirement); no `<main>` landmark on workspace page for assistive technology; consider `dvh` units to restore landmark without breaking layout.
