@@ -7,6 +7,7 @@ import { ArtifactContent } from '@/components/workspace/ArtifactContent'
 import { AttentionRegion } from '@/components/workspace/AttentionRegion'
 import { MidgardButton } from '@/components/workspace/MidgardButton'
 import { cn } from '@/lib/utils'
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import type { Artifact } from '@/actions/projects'
 import type { ArtifactType } from '@/types/artifacts'
 
@@ -52,27 +53,38 @@ export function ArtifactWorkspace({ artifacts, projectId }: ArtifactWorkspacePro
       </div>
 
       {/* Tablet icon strip */}
-      <div
-        className="hidden tablet:flex mobile:hidden flex-col flex-shrink-0 border-r border-mg-border"
-        style={{ width: 'var(--index-panel-collapsed)' }}
-      >
-        {ARTIFACT_TYPES.map((type) => (
-          <button
-            key={type}
-            onClick={() => { setActiveArtifact(type); setTrayOpen(true) }}
-            aria-label={ARTIFACT_LABELS[type]}
-            aria-current={activeArtifact === type ? 'true' : undefined}
-            className={cn(
-              'h-11 w-full truncate font-mono text-[11px] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-mg-foreground-subtle',
-              activeArtifact === type
-                ? 'text-mg-accent'
-                : 'text-mg-foreground-muted hover:text-mg-foreground'
-            )}
-          >
-            {ARTIFACT_LABELS[type]}
-          </button>
-        ))}
-      </div>
+      <TooltipProvider delayDuration={200}>
+        <div
+          className="hidden tablet:flex mobile:hidden flex-col flex-shrink-0 border-r border-mg-border"
+          style={{ width: 'var(--index-panel-collapsed)' }}
+        >
+          {ARTIFACT_TYPES.map((type) => (
+            <Tooltip key={type}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => { setActiveArtifact(type); setTrayOpen(true) }}
+                  aria-label={ARTIFACT_LABELS[type]}
+                  aria-current={activeArtifact === type ? 'true' : undefined}
+                  className={cn(
+                    'h-11 w-full truncate font-mono text-[11px] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-mg-foreground-subtle',
+                    activeArtifact === type
+                      ? 'text-mg-accent'
+                      : 'text-mg-foreground-muted hover:text-mg-foreground'
+                  )}
+                >
+                  {ARTIFACT_LABELS[type]}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="right"
+                className="bg-mg-surface border border-mg-border font-mono text-[11px] text-mg-foreground [&>svg]:hidden"
+              >
+                {ARTIFACT_LABELS[type]}
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      </TooltipProvider>
 
       {/* Tablet overlay tray */}
       {trayOpen && (
@@ -103,7 +115,7 @@ export function ArtifactWorkspace({ artifacts, projectId }: ArtifactWorkspacePro
             aria-expanded={mobileNavOpen}
             aria-controls="mobile-artifact-nav"
             onClick={() => setMobileNavOpen((prev) => !prev)}
-            className="h-11 w-full flex items-center px-4 font-mono text-[11px] text-mg-foreground-muted"
+            className="h-11 w-full flex items-center px-4 font-mono text-[11px] text-mg-foreground-subtle"
           >
             {ARTIFACT_LABELS[activeArtifact]}
           </button>

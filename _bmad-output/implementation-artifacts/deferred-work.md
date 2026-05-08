@@ -1,3 +1,7 @@
+## Deferred from: code review of 5-6-workspace-accessibility-and-responsive-polish (2026-05-07)
+
+- `trayOpen` has no toggle when the already-active artifact button is re-clicked on the tablet icon strip — keyboard users cannot close the overlay tray by pressing the active button again; Escape is the only dismiss path. Pre-existing behavior unchanged by this diff (`components/workspace/ArtifactWorkspace.tsx`).
+
 ## Deferred from: code review of 5-5-section-regeneration (2026-05-07)
 
 - `JSON.stringify(currentContent)` has no size cap before sending to Claude — large artifacts may silently exceed context window and return the opaque REGENERATION_ERROR with no diagnostic (`lib/claude/regenerate.ts:71`).

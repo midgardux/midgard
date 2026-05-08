@@ -1,5 +1,6 @@
 'use client'
 
+import { cn } from '@/lib/utils'
 import { MidgardButton } from '@/components/workspace/MidgardButton'
 
 interface SectionRegenerateControlProps {
@@ -14,8 +15,15 @@ export function SectionRegenerateControl({
   className,
 }: SectionRegenerateControlProps) {
   return (
-    <MidgardButton tier="nano" type="button" className={className} onClick={onClick} disabled={disabled}>
-      ↺ regenerate
-    </MidgardButton>
+    <div
+      className={cn(
+        'tablet:min-h-[44px] mobile:min-h-[44px] tablet:flex mobile:flex tablet:items-center mobile:items-center tablet:cursor-pointer mobile:cursor-pointer',
+        className
+      )}
+    >
+      <MidgardButton tier="nano" type="button" onClick={onClick} disabled={disabled}>
+        ↺ regenerate
+      </MidgardButton>
+    </div>
   )
 }

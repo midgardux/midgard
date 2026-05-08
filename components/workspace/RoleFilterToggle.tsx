@@ -34,6 +34,7 @@ export function RoleFilterToggle({ artifacts, projectId, className }: RoleFilter
   const chipClass = (isActive: boolean) =>
     cn(
       'font-mono text-[11px] px-2 py-0.5 border rounded cursor-pointer transition-colors',
+      'tablet:min-h-[44px] mobile:min-h-[44px] tablet:flex mobile:flex tablet:items-center mobile:items-center',
       isActive
         ? 'border-mg-accent bg-mg-accent-surface text-mg-accent'
         : 'border-mg-border text-mg-foreground-subtle hover:border-mg-muted hover:text-mg-foreground-muted'
