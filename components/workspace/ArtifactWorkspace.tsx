@@ -130,7 +130,7 @@ export function ArtifactWorkspace({ artifacts, projectId }: ArtifactWorkspacePro
               </AttentionRegion>
             </div>
           )}
-          <ArtifactContent artifacts={artifacts} />
+          <ArtifactContent artifacts={artifacts} projectId={projectId} />
         </div>
       </div>
     </div>

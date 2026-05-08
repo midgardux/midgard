@@ -8,9 +8,10 @@ import type { ArtifactContent as ArtifactContentData } from '@/types/artifacts'
 
 interface ArtifactContentProps {
   artifacts: Artifact[]
+  projectId: string
 }
 
-export function ArtifactContent({ artifacts }: ArtifactContentProps) {
+export function ArtifactContent({ artifacts, projectId }: ArtifactContentProps) {
   const activeArtifact = useWorkspaceStore((s) => s.activeArtifact)
   const activeRole = useWorkspaceStore((s) => s.activeRole)
   const setActiveRole = useWorkspaceStore((s) => s.setActiveRole)
@@ -56,6 +57,8 @@ export function ArtifactContent({ artifacts }: ArtifactContentProps) {
               key={section.id}
               section={section}
               pending={!section.body}
+              projectId={projectId}
+              artifactType={activeArtifact}
             />
           ))}
         </div>

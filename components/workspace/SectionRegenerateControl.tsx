@@ -3,13 +3,18 @@
 import { MidgardButton } from '@/components/workspace/MidgardButton'
 
 interface SectionRegenerateControlProps {
-  sectionId: string
+  onClick: () => void
+  disabled?: boolean
   className?: string
 }
 
-export function SectionRegenerateControl({ className }: SectionRegenerateControlProps) {
+export function SectionRegenerateControl({
+  onClick,
+  disabled,
+  className,
+}: SectionRegenerateControlProps) {
   return (
-    <MidgardButton tier="nano" type="button" className={className}>
+    <MidgardButton tier="nano" type="button" className={className} onClick={onClick} disabled={disabled}>
       ↺ regenerate
     </MidgardButton>
   )

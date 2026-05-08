@@ -1,3 +1,10 @@
+## Deferred from: code review of 5-5-section-regeneration (2026-05-07)
+
+- `JSON.stringify(currentContent)` has no size cap before sending to Claude — large artifacts may silently exceed context window and return the opaque REGENERATION_ERROR with no diagnostic (`lib/claude/regenerate.ts:71`).
+- Section-level shape validation missing — individual sections cast from JSONB are not validated; `roles` could be undefined on a malformed DB row, causing a crash downstream when `roles.includes(...)` is called (`actions/regeneration.ts:46`).
+- `token_usage` insert is awaited — correctness unaffected (failure is logged, not returned) but adds latency before client response; convert to fire-and-forget if response time becomes a concern (`actions/regeneration.ts:64`).
+- `section.title` interpolated unescaped in LLM user message — DB-origin data so low practical risk, but could be sanitized or JSON-encoded in the prompt for defence-in-depth (`lib/claude/regenerate.ts:71`).
+
 ## Deferred from: code review of 5-4-rolefiltertoggle (2026-05-07)
 
 - Role string case/whitespace inconsistency produces duplicate chips — if AI generates roles with inconsistent casing (e.g. `"Dev"` vs `"dev"`), `Set`-based deduplication treats them as distinct; clicking one chip won't match sections tagged with the other case variant (`components/workspace/RoleFilterToggle.tsx`, `allRoles` useMemo).
