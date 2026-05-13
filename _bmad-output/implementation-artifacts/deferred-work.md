@@ -1,3 +1,9 @@
+## Deferred from: code review of 6-1-stripe-integration-and-webhook-handler (2026-05-12)
+
+- No idempotency check for duplicate webhook delivery — Stripe at-least-once delivery can race duplicate events to update the same `profiles` row; no event-ID deduplication or locking. System-level concern not introduced by this story (`app/api/webhooks/stripe/route.ts`).
+- `PRO_PRICE_ID` defaults to `''` when `STRIPE_PRO_PRICE_ID` env var is absent — `?? ''` coerces a missing variable to empty string; callers using it as a truthy guard will silently skip. Not consumed in Story 6.1; Story 6.2 should validate before creating a checkout session (`lib/stripe/products.ts:1`).
+- Middleware bypass uses prefix match — `pathname.startsWith("/api/webhooks/stripe")` auto-exempts any future sub-paths without an explicit decision; consistent with existing proxy.ts pattern for all public paths (`lib/supabase/proxy.ts:58`).
+
 ## Deferred from: code review of 5-6-workspace-accessibility-and-responsive-polish (2026-05-07)
 
 - `trayOpen` has no toggle when the already-active artifact button is re-clicked on the tablet icon strip — keyboard users cannot close the overlay tray by pressing the active button again; Escape is the only dismiss path. Pre-existing behavior unchanged by this diff (`components/workspace/ArtifactWorkspace.tsx`).

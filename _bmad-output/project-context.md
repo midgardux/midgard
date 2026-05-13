@@ -156,7 +156,7 @@ _Critical rules and patterns for implementing code in this project. Focused on u
 
 **Middleware public path allowlist:**
 - When adding a new public route (e.g. `/pricing` in Epic 2), update BOTH the redirect guard block AND the `isPublicPath` boolean in `lib/supabase/proxy.ts`
-- Current public paths: `/` (exact), `/login*`, `/signup*`, `/forgot-password*`, `/auth*`
+- Current public paths: `/` (exact), `/login*`, `/signup*`, `/forgot-password*`, `/auth*`, `/api/webhooks/stripe*`
 
 ---
 

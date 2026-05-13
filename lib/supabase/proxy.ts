@@ -54,7 +54,8 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
     pathname.startsWith("/forgot-password") ||
-    pathname.startsWith("/auth");
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/api/webhooks/stripe");
 
   if (!user && !isPublicPath) {
     // no user, potentially respond by redirecting the user to the login page
