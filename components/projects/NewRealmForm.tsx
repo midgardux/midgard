@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createProject } from '@/actions/projects'
+import { createCheckoutSession } from '@/actions/subscription'
 
 interface NewRealmFormProps {
   variant: 'header' | 'empty-state'
@@ -14,6 +15,28 @@ interface UpgradePromptProps {
 }
 
 function UpgradePrompt({ realmCount, onReset }: UpgradePromptProps) {
+  const [isUpgrading, setIsUpgrading] = useState(false)
+  const [upgradeError, setUpgradeError] = useState<string | null>(null)
+
+  async function handleUpgrade() {
+    if (isUpgrading) return
+    setIsUpgrading(true)
+    setUpgradeError(null)
+    try {
+      const result = await createCheckoutSession()
+      if (!result.success) {
+        setUpgradeError(result.error)
+        setIsUpgrading(false)
+        return
+      }
+      window.location.assign(result.data.url)
+      // Don't reset isUpgrading — browser is navigating away
+    } catch {
+      setIsUpgrading(false)
+      setUpgradeError('Something went wrong. Please try again.')
+    }
+  }
+
   return (
     <div className="border border-mg-border px-7 py-6 mt-2">
       <p className="font-mono text-xs text-mg-foreground uppercase tracking-widest mb-3">
@@ -24,12 +47,14 @@ function UpgradePrompt({ realmCount, onReset }: UpgradePromptProps) {
         unlimited Realms, priority analysis, and no usage caps.
       </p>
       <div className="flex items-center gap-4">
-        <a
-          href="/pricing?plan=pro"
-          className="bg-mg-accent text-mg-background font-mono text-xs uppercase tracking-wider px-4 py-2 hover:opacity-90 transition-opacity inline-block"
+        <button
+          type="button"
+          onClick={handleUpgrade}
+          disabled={isUpgrading}
+          className="bg-mg-accent text-mg-background font-mono text-xs uppercase tracking-wider px-4 py-2 hover:opacity-90 transition-opacity disabled:opacity-40"
         >
-          Upgrade to Pro
-        </a>
+          {isUpgrading ? 'Redirecting...' : 'Upgrade to Pro'}
+        </button>
         <button
           type="button"
           onClick={onReset}
@@ -38,6 +63,9 @@ function UpgradePrompt({ realmCount, onReset }: UpgradePromptProps) {
           Try again
         </button>
       </div>
+      {upgradeError && (
+        <p className="font-mono text-xs text-mg-destructive mt-2">{upgradeError}</p>
+      )}
     </div>
   )
 }

@@ -1,3 +1,8 @@
+## Deferred from: code review of 6-2-upgrade-to-pro (2026-05-14)
+
+- `Suspense fallback={null}` on `/projects` page — no loading skeleton while `RealmList` fetches; user sees blank `<main>` container. Introduced as a quick Suspense boundary fix; add skeleton in a polish pass (`app/(app)/projects/page.tsx`).
+- `isUpgrading` stuck `true` if navigation doesn't unload the component — full-page `window.location.assign` calls always unmount, so practical impact is nil; revisit only if `success_url` is ever changed to a client-side route (`components/projects/NewRealmForm.tsx`).
+
 ## Deferred from: code review of 6-1-stripe-integration-and-webhook-handler (2026-05-12)
 
 - No idempotency check for duplicate webhook delivery — Stripe at-least-once delivery can race duplicate events to update the same `profiles` row; no event-ID deduplication or locking. System-level concern not introduced by this story (`app/api/webhooks/stripe/route.ts`).

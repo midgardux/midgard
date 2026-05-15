@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-04-18"
-last_updated: "2026-05-12"  # story 6-1 done
+last_updated: "2026-05-14"  # story 6-2 done
 project: Midgard
 project_key: NOKEY
 tracking_system: file-system
@@ -101,7 +101,7 @@ development_status:
   # ─────────────────────────────────────────
   epic-6: in-progress
   6-1-stripe-integration-and-webhook-handler: done
-  6-2-upgrade-to-pro: backlog
+  6-2-upgrade-to-pro: done
   6-3-subscription-management-portal: backlog
   epic-6-retrospective: optional
 

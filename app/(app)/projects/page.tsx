@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { listProjects } from '@/actions/projects'
@@ -14,14 +15,12 @@ const realmDateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
 })
 
-export default async function ProjectsPage() {
+async function RealmList() {
   const result = await listProjects()
 
   if (!result.success) {
     return (
-      <main className="px-6 py-8 max-w-4xl mx-auto">
-        <p className="font-mono text-xs text-mg-destructive mt-4">Failed to load Realms.</p>
-      </main>
+      <p className="font-mono text-xs text-mg-destructive mt-4">Failed to load Realms.</p>
     )
   }
 
@@ -29,7 +28,7 @@ export default async function ProjectsPage() {
   const isEmpty = realms.length === 0
 
   return (
-    <main className="px-6 py-8 max-w-4xl mx-auto">
+    <>
       <div className="flex items-start justify-between">
         <span className="font-mono text-xs uppercase tracking-widest text-mg-foreground-muted">
           Realms
@@ -58,6 +57,16 @@ export default async function ProjectsPage() {
           ))}
         </ul>
       )}
+    </>
+  )
+}
+
+export default function ProjectsPage() {
+  return (
+    <main className="px-6 py-8 max-w-4xl mx-auto">
+      <Suspense fallback={null}>
+        <RealmList />
+      </Suspense>
     </main>
   )
 }
