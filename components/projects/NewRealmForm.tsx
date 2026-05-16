@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createProject } from '@/actions/projects'
 import { createCheckoutSession } from '@/actions/subscription'
+import { AttentionRegion } from '@/components/workspace/AttentionRegion'
 
 interface NewRealmFormProps {
   variant: 'header' | 'empty-state'
@@ -38,13 +39,15 @@ function UpgradePrompt({ realmCount, onReset }: UpgradePromptProps) {
   }
 
   return (
-    <div className="border border-mg-border px-7 py-6 mt-2">
+    <AttentionRegion variant="info" aria-label="Realm limit reached" className="mt-2">
       <p className="font-mono text-xs text-mg-foreground uppercase tracking-widest mb-3">
         Realm limit reached
       </p>
       <p className="font-sans text-sm text-mg-foreground-muted leading-relaxed mb-4">
-        You&apos;ve built {realmCount} {realmCount === 1 ? 'Realm' : 'Realms'}. Upgrade to Pro for
-        unlimited Realms, priority analysis, and no usage caps.
+        {realmCount > 0
+          ? <>You&apos;ve built {realmCount} {realmCount === 1 ? 'Realm' : 'Realms'}. Upgrade to Pro for unlimited Realms, priority analysis, and no usage caps.</>
+          : <>Free tier Realm creation is currently paused. Upgrade to Pro for unlimited Realms, priority analysis, and no usage caps.</>
+        }
       </p>
       <div className="flex items-center gap-4">
         <button
@@ -66,7 +69,7 @@ function UpgradePrompt({ realmCount, onReset }: UpgradePromptProps) {
       {upgradeError && (
         <p className="font-mono text-xs text-mg-destructive mt-2">{upgradeError}</p>
       )}
-    </div>
+    </AttentionRegion>
   )
 }
 

@@ -1,3 +1,8 @@
+## Deferred from: code review of 7-2-free-tier-cap-runtime-configuration (2026-05-16)
+
+- `hashtext()` advisory lock key uses 32-bit hash space — `hashtext(v_user_id::text)::bigint` occupies only 2^32 possible values; birthday-paradox collision probability reaches ~50% at ~65,536 unique users. Consequence is unnecessary request serialization between two unlucky users (not a correctness or security failure — count/insert are still scoped by `user_id`). Old code had no locking at all; this is an improvement. Revisit with a 64-bit hash (e.g. `('x' || substr(md5(v_user_id::text), 1, 16))::bit(64)::bigint`) before scaling beyond tens of thousands of users (`supabase/migrations/006_create_project_rpc.sql:19`).
+- Race window / idempotency — `create_project_if_cap_allows` RPC transaction can commit successfully but the network response lost, causing the caller to treat it as a failure. A retry would create a duplicate project. No client-supplied idempotency key exists. Pre-existing network-level concern not unique to this RPC; revisit when adding retry logic or a duplicate-project guard (`actions/projects.ts:54`).
+
 ## Deferred from: code review of 7-1-token-spend-alerting (2026-05-15)
 
 - No pagination — PostgREST 1,000-row default may truncate monthly `token_usage` rows, understating spend; spec accepts in-memory aggregation at V1 scale (`supabase/functions/monthly-token-alert/index.ts:20-23`).

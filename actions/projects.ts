@@ -38,29 +38,29 @@ export async function createProject(name: string): Promise<ActionResult<Project>
   if (!profile) return { success: false, error: 'Profile not found' }
 
   if (profile.subscription_tier === 'free') {
-    // Read config fresh on every call — no caching (FR37, Story 7.2 AC1/AC3)
-    const { data: configRow, error: configError } = await supabase
-      .from('config')
-      .select('value')
-      .eq('key', 'free_tier_project_cap')
-      .single()
-    if (configError) return { success: false, error: configError.message }
-    if (!configRow) return { success: false, error: 'Cap configuration not found' }
+    // Single atomic RPC: reads cap from config, advisory-locks per user, checks count, inserts (AC1, AC3, AC6)
+    const { data: rows, error: rpcError } = await supabase
+      .rpc('create_project_if_cap_allows', { p_name: trimmedName })
 
-    const cap = parseInt(configRow.value, 10)
-    if (isNaN(cap)) return { success: false, error: 'Invalid cap configuration' }
-
-    // RLS auto-scopes this count to the authenticated user — no manual user_id filter needed
-    const { count, error: countError } = await supabase
-      .from('projects')
-      .select('*', { count: 'exact', head: true })
-    if (countError) return { success: false, error: countError.message }
-
-    if ((count ?? 0) >= cap) {
-      return { success: false, error: `PROJECT_CAP_REACHED:${count ?? 0}` }
+    if (rpcError) {
+      if (rpcError.code === 'P0001' && rpcError.message.startsWith('CAP_REACHED:')) {
+        const count = parseInt(rpcError.message.split(':')[1] ?? '0', 10)
+        return { success: false, error: `PROJECT_CAP_REACHED:${isNaN(count) ? 0 : count}` }
+      }
+      if (rpcError.code === 'P0001' && rpcError.message === 'CAP_CONFIG_MISSING') {
+        return { success: false, error: 'Cap configuration not found' }
+      }
+      if (rpcError.code === '22P02') {
+        return { success: false, error: 'Invalid cap configuration' }
+      }
+      return { success: false, error: rpcError.message }
     }
+
+    if (!rows || rows.length === 0) return { success: false, error: 'Project creation failed' }
+    return { success: true, data: rows[0] }
   }
 
+  // Pro-tier path: no cap check, direct insert (AC5)
   const { data, error } = await supabase
     .from('projects')
     .insert({
