@@ -71,3 +71,36 @@ export async function createCheckoutSession(): Promise<ActionResult<{ url: strin
 
   return { success: true, data: { url: session.url } }
 }
+
+export async function createPortalSession(): Promise<ActionResult<{ url: string }>> {
+  const supabase = await createServerClient()
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+  if (authError || !user) return { success: false, error: 'Not authenticated.' }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('subscription_tier, stripe_customer_id')
+    .eq('id', user.id)
+    .single()
+  if (profileError || !profile) return { success: false, error: 'Profile not found.' }
+
+  const customerId = profile.stripe_customer_id
+  if (!customerId) return { success: false, error: 'No billing account found. Contact support.' }
+
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+  const stripe = getStripeClient()
+
+  try {
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${origin}/account`,
+    })
+    return { success: true, data: { url: session.url } }
+  } catch {
+    return { success: false, error: 'Failed to create portal session.' }
+  }
+}

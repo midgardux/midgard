@@ -1,3 +1,12 @@
+## Deferred from: code review of 6-3-subscription-management-portal (2026-05-14)
+
+- `session.url` null guard in `createPortalSession` — Stripe API guarantees non-null url on success; TypeScript types may allow null but it is never null when the call succeeds; revisit if Stripe type definitions change (`actions/subscription.ts:92`).
+- `result.data.url` null guard in button components — same Stripe API contract; `window.location.assign(null)` would navigate to origin root; guarded upstream by action contract (`components/account/ManageSubscriptionButton.tsx`, `components/account/UpgradeButton.tsx`).
+- Empty `catch {}` blocks discard error details in buttons — no `console.error`; UX surfaces a generic message per spec; add server/client logging in a monitoring pass (`components/account/ManageSubscriptionButton.tsx`, `components/account/UpgradeButton.tsx`).
+- `subscription_tier` string literal comparison — DB check constraint `('free', 'pro')` and Supabase generated types enforce valid values; runtime enum validation is over-engineering for this story (`app/(app)/account/page.tsx`).
+- `profileError` details discarded in `createPortalSession` — intentional per anti-pattern spec (do not surface raw Supabase errors); add structured server-side logging in a monitoring pass (`actions/subscription.ts:88`).
+- Duplicated button component logic (`ManageSubscriptionButton`, `UpgradeButton`) — identical state/guard/redirect pattern; both spec-compliant; extract to a shared `useRedirectAction` hook in a future refactor pass.
+
 ## Deferred from: code review of 6-2-upgrade-to-pro (2026-05-14)
 
 - `Suspense fallback={null}` on `/projects` page — no loading skeleton while `RealmList` fetches; user sees blank `<main>` container. Introduced as a quick Suspense boundary fix; add skeleton in a polish pass (`app/(app)/projects/page.tsx`).
