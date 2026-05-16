@@ -1,3 +1,10 @@
+## Deferred from: code review of 7-1-token-spend-alerting (2026-05-15)
+
+- No pagination — PostgREST 1,000-row default may truncate monthly `token_usage` rows, understating spend; spec accepts in-memory aggregation at V1 scale (`supabase/functions/monthly-token-alert/index.ts:20-23`).
+- `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` non-null assertions are outside the `try/catch` handler; would produce an unhandled panic if vars are absent, but Supabase platform auto-injects both in all deployed Edge Functions (`supabase/functions/monthly-token-alert/index.ts:9-11`).
+- `parseFloat` for cost calculation — IEEE 754 rounding is acceptable for V1 spend alerting; revisit if sub-cent precision matters at higher volume (`supabase/functions/monthly-token-alert/index.ts:30`).
+- Cost defaults ($3.00 / $15.00) hardcoded to Claude Sonnet 4.6 pricing; env vars `INPUT_COST_PER_MILLION_TOKENS` and `OUTPUT_COST_PER_MILLION_TOKENS` override without redeployment as designed by spec (`supabase/functions/monthly-token-alert/index.ts:4-5`).
+
 ## Deferred from: code review of 6-3-subscription-management-portal (2026-05-14)
 
 - `session.url` null guard in `createPortalSession` — Stripe API guarantees non-null url on success; TypeScript types may allow null but it is never null when the call succeeds; revisit if Stripe type definitions change (`actions/subscription.ts:92`).
