@@ -1,12 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createServerClient } from '@/lib/supabase/server'
 import { signOut } from '@/actions/auth'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
   return (
     <>
       <header className="sticky top-0 z-10 border-b border-mg-border bg-mg-background h-[46px] flex items-center">
