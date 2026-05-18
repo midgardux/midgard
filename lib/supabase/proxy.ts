@@ -68,7 +68,7 @@ export async function updateSession(request: NextRequest) {
     const now = new Date().toISOString();
     const { error: updateError } = await supabase
       .from("profiles")
-      .upsert({ id: user.sub, last_active_at: now, updated_at: now }, { onConflict: "id" });
+      .upsert({ id: user.sub, last_active_at: now, updated_at: now, notified_at: null }, { onConflict: "id" });
     if (updateError) {
       console.error("[middleware] last_active_at update failed:", updateError.message);
     }

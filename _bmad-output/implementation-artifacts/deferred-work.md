@@ -1,3 +1,12 @@
+## Deferred from: code review of 7-3-inactivity-purge-with-advance-notification (2026-05-17)
+
+- TOCTOU: user who logs in between the `profiles` query and the `purge_inactive_user` RPC call is deleted despite being active — inherent to two-phase query-then-act across HTTP API; not fixable without distributed transactions (`supabase/functions/monthly-inactivity-purge/index.ts:42-58`).
+- N+1 serial `auth.admin.getUserById` calls in notification loop — no batching or parallelism; correctness unaffected, performance concern only (`supabase/functions/monthly-inactivity-purge/index.ts:80`).
+- Auth service outage silently skips all 11-month notifications in a given run — no way to distinguish from zero candidates; infrastructure failure outside code control (`supabase/functions/monthly-inactivity-purge/index.ts:69-116`).
+- `userData.user` null (orphaned profile row) produces same error message as "no email found" — misleading log output, behavior correct (`supabase/functions/monthly-inactivity-purge/index.ts:82`).
+- Midnight UTC thresholds: users with time-of-day precision in `last_active_at` may fall outside the purge/notify window by up to 24h — acceptable precision for monthly job (`supabase/functions/monthly-inactivity-purge/index.ts:23-33`).
+- Concurrent pg_cron runs could process same users twice — pg_cron scheduling makes this extremely unlikely; re-deleting empty rows is harmless (`supabase/migrations/007_purge_inactive_user_rpc.sql`).
+
 ## Deferred from: code review of 7-2-free-tier-cap-runtime-configuration (2026-05-16)
 
 - `hashtext()` advisory lock key uses 32-bit hash space — `hashtext(v_user_id::text)::bigint` occupies only 2^32 possible values; birthday-paradox collision probability reaches ~50% at ~65,536 unique users. Consequence is unnecessary request serialization between two unlucky users (not a correctness or security failure — count/insert are still scoped by `user_id`). Old code had no locking at all; this is an improvement. Revisit with a 64-bit hash (e.g. `('x' || substr(md5(v_user_id::text), 1, 16))::bit(64)::bigint`) before scaling beyond tens of thousands of users (`supabase/migrations/006_create_project_rpc.sql:19`).
